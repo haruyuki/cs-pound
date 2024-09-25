@@ -1,10 +1,10 @@
 ---
 layout: page
 title: About me
-subtitle: Haru / Haruyuki / blumewmew
+subtitle: Hi, I'm Haruyuki!
 ---
 
-Hi, I'm Haruyuki, or you can call Haru or blumewmew or whichever online name you know me by, nice to meet you!
+Or you can call Haru or blumewmew or whichever online name you know me by, nice to meet you!
 
 I am a student living in Australia and have a great passion for coding. This Discord bot is a major project during high school that I have kept running for over 6 years now and unfortunately have not had time recently to provide proper updates to it anymore.
 
