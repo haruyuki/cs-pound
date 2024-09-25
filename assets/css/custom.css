@@ -1,0 +1,82 @@
+.centered {
+  text-align: center;
+}
+.centered a {
+  padding: 0.9375rem 1.875rem;
+  font-size: 1.625rem;
+  margin-top: 0.625rem;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+a.btn {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.main-area {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: #eee;
+  padding: 1.25rem 0.9375rem;
+}
+
+.main-area p {
+  text-align: justify;
+  margin-bottom: 0.9375rem;
+  font-size: 1.3125rem;
+  font-weight: 200;
+}
+
+@media (min-width: 768px) {
+  .main-area {
+    padding-top: 0.5rem;
+    padding-left: 3.75rem;
+    padding-right: 3.75rem;
+    padding-bottom: 3rem;
+  }
+}
+
+.dbox {
+  width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .dbox {
+    margin-bottom: 25px !important;
+    padding: 0 20px; }
+}
+
+.dbox p {
+  margin-bottom: 0;
+}
+
+.dbox p span {
+    font-weight: 500;
+    color: #000;
+}
+
+.dbox p a {
+    color: #404040;
+}
+
+.dbox .icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #404040;
+  margin: 0 auto;
+}
+
+.dbox .icon span {
+    font-size: 20px;
+    color: #fff;
+}
+
+.dbox .text {
+  width: 100%;
+}
+
+.d-flex {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+}

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Skip if build is triggered by pull request
+if [ $TRAVIS_PULL_REQUEST == "true" ]; then
+  echo "This is PR, exiting..."
+  exit 0
+fi
+
+# Enable error reporting to the console
+set -e
+
+# Clone main branch
+git clone https://${GH_TOKEN}@github.com/haruyuki/haruyuki.github.io.git --branch main --single-branch _main
+
+# Build with Jekyll into "_site"
+cd _main
+bundle exec jekyll build
+cd ..
+
+# Clone gh-pages branch
+git clone https://${GH_TOKEN}@github.com/haruyuki/haruyuki.github.io.git --branch gh-pages --single-branch _site
+
+# Remove all current contents of _site
+rm -rv _site/*
+
+# Move newly generated build to _site
+mv -v _main/_site/* _site/
+
+# Push
+cd _site
+git config user.email "10248303+haruyuki@users.noreply.github.com"
+git config user.name "Oliver Lin"
+git add --all
+git commit -a -m "Travis Build $TRAVIS_BUILD_NUMBER"
+git push --force origin gh-pages
