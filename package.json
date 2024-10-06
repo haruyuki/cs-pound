@@ -10,6 +10,11 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "discord.js": "^14.16.3"
-  }
+    "discord.js": "^14.16.3",
+    "rebrowser-puppeteer": "^23.3.100",
+    "rebrowser-puppeteer-core": "^23.3.100"
+  },
+  "trustedDependencies": [
+    "rebrowser-puppeteer"
+  ]
 }

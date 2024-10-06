@@ -177,3 +177,4 @@ dist
 # Custom
 config.json
 **/*.bun
+chrome_data
