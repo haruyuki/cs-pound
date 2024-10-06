@@ -20,7 +20,7 @@ module.exports = {
                 { name: 'Command Count', value: `${commandCount}`, inline: true },
                 { name: 'Node Version', value: `${nodeVersion}`, inline: true },
                 { name: 'discord.js Version', value: `${discordJsVersion}`, inline: true },
-                { name: 'Bot Uptime', value: `${Math.floor(process.uptime())} = ${uptime}`, inline: true }
+                { name: 'Bot Uptime', value: `${uptime}`, inline: true }
             );
 
         await interaction.reply({ embeds: [statsEmbed] });
