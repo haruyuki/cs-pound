@@ -14,6 +14,7 @@ module.exports = {
         const statsEmbed = new EmbedBuilder()
             .setColor(0x00AE86)
             .setTitle('CS-Pound Stats')
+            .setDescription('`Created by blumewmew. CS: haruyuki`')
             .addFields(
                 { name: 'Guild Count', value: `${guildCount}`, inline: true },
                 { name: 'Command Count', value: `${commandCount}`, inline: true },
