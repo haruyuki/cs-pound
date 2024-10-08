@@ -2,6 +2,9 @@ import { readdirSync, promises as fsPromises } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -47,13 +50,11 @@ async function loadEvents() {
     }
 }
 
-const config = JSON.parse(await fsPromises.readFile(join(__dirname, 'config.json'), 'utf-8'));
-
 // Login and initialization
 async function init() {
     await loadCommands();
     await loadEvents();
-    client.login(config.token);
+    await client.login(process.env.DISCORD_TOKEN);
 }
 
 init(); // Start the async functions
