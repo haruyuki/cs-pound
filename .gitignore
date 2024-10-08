@@ -178,3 +178,4 @@ dist
 config.json
 **/*.bun
 chrome_data
+chickensmoothie.db
