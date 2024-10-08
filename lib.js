@@ -1,42 +1,63 @@
-const Sequelize = require('sequelize');
+import Sequelize, {STRING, NUMBER} from 'sequelize';
+import {launch} from 'rebrowser-puppeteer';
 
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
     dialect: 'sqlite',
     logging: false,
     storage: 'chickensmoothie.db',
 });
 
-const PetDB = sequelize.define('ChickenSmoothiePetArchive', {
+export const PetDB = sequelize.define('ChickenSmoothiePetArchive', {
     petID: {
-        type: Sequelize.STRING,
+        type: STRING,
         unique: true,
         primaryKey: true,
     },
-    petYear: Sequelize.NUMBER,
-    petEvent: Sequelize.STRING,
-    petLink: Sequelize.STRING,
+    petYear: NUMBER,
+    petEvent: STRING,
+    petLink: STRING,
 }, {
     freezeTableName: true,
     timestamps: false,
 });
 
-const ItemDB = sequelize.define('ChickenSmoothieItemArchive', {
+export const ItemDB = sequelize.define('ChickenSmoothieItemArchive', {
     itemLID: {
-        type: Sequelize.STRING,
+        type: STRING,
         unique: true,
         primaryKey: true,
     },
     itemRID: {
-        type: Sequelize.STRING,
+        type: STRING,
         unique: true,
     },
-    itemName: Sequelize.STRING,
-    itemYear: Sequelize.NUMBER,
-    itemEvent: Sequelize.STRING,
-    itemLink: Sequelize.STRING,
+    itemName: STRING,
+    itemYear: NUMBER,
+    itemEvent: STRING,
+    itemLink: STRING,
 }, {
     freezeTableName: true,
     timestamps: false,
 });
 
-module.exports = { sequelize, PetDB, ItemDB };
+export const getPoundTime = async () => {
+    const browser = await launch({userDataDir: './chrome_data'});
+    const page = await browser.newPage();
+    await page.setRequestInterception(true)
+    page.on('request', (request) => {
+        if (request.resourceType() === 'image') request.abort()
+        else request.continue()
+    })
+    await page.goto('https://www.chickensmoothie.com/poundandlostandfound.php', {waitUntil: 'domcontentloaded'});
+    const element = await page.$('h2:last-of-type');
+    let text = (await element.evaluate(el => el.textContent)).trim();
+    const correction = {
+        "Sorry, the pound is closed at the moment.": "",
+        "Sorry, the Lost and Found is closed at the moment.": "",
+        "\n": "",
+        "\t": "",
+    }
+    const reg = new RegExp(Object.keys(correction).join("|"), "g");
+    await browser.close();
+    return text.replace(reg, (matched) => correction[matched]);
+}

@@ -16,9 +16,5 @@
     "rebrowser-puppeteer-core": "^23.3.100",
     "sequelize": "^6.37.4",
     "sqlite3": "^5.1.7"
-  },
-  "trustedDependencies": [
-    "rebrowser-puppeteer",
-    "sqlite3"
-  ]
+  }
 }

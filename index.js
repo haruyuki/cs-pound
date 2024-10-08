@@ -1,41 +1,59 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, GatewayIntentBits, Collection} = require('discord.js');
-const { token } = require('./config.json');
+import { readdirSync, promises as fsPromises } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { Client, GatewayIntentBits, Collection } from 'discord.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.commands = new Collection();
 
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+// Function to load commands
+async function loadCommands() {
+    const foldersPath = join(__dirname, 'commands');
+    const commandFolders = readdirSync(foldersPath);
 
-for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder);
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
-        if ('data' in command && 'execute' in command) {
-            client.commands.set(command.data.name, command);
-            console.log(`Command ${command.data.name} loaded from ${filePath}.`);
-        } else {
-            console.error(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+    for (const folder of commandFolders) {
+        const commandsPath = join(foldersPath, folder);
+        const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+        for (const file of commandFiles) {
+            const filePath = pathToFileURL(join(commandsPath, file));
+            const command = await import(filePath); // Dynamic import inside async function
+            if ('data' in command && 'execute' in command) {
+                client.commands.set(command.data.name, command);
+                console.log(`Command ${command.data.name} loaded from ${filePath}.`);
+            } else {
+                console.error(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+            }
         }
     }
 }
 
-const eventsPath = path.join(__dirname, 'events');
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+// Function to load events
+async function loadEvents() {
+    const eventsPath = join(__dirname, 'events');
+    const eventFiles = readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
-for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
-    const event = require(filePath);
-    if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args));
-    } else {
-        client.on(event.name, (...args) => event.execute(...args));
+    for (const file of eventFiles) {
+        const filePath = pathToFileURL(join(eventsPath, file));
+        const event = await import(filePath); // Dynamic import inside async function
+        if (event.once) {
+            client.once(event.name, (...args) => event.execute(...args));
+        } else {
+            client.on(event.name, (...args) => event.execute(...args));
+        }
     }
 }
 
-client.login(token);
+const config = JSON.parse(await fsPromises.readFile(join(__dirname, 'config.json'), 'utf-8'));
+
+// Login and initialization
+async function init() {
+    await loadCommands();
+    await loadEvents();
+    client.login(config.token);
+}
+
+init(); // Start the async functions
