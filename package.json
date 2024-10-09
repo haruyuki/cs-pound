@@ -3,9 +3,11 @@
   "module": "index.js",
   "type": "module",
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
+    "discord-api-types": "^0.37.101",
     "dotenv": "^16.4.5",
     "eslint": "^9.12.0",
-    "discord-api-types": "^0.37.101"
+    "prettier": "^3.3.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -18,5 +20,9 @@
     "rebrowser-puppeteer-core": "^23.3.100",
     "sequelize": "^6.37.4",
     "sqlite3": "^5.1.7"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "format": "prettier --write ."
   }
 }
