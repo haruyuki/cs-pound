@@ -1,63 +1,76 @@
-import Sequelize, {STRING, NUMBER} from 'sequelize';
-import {launch} from 'rebrowser-puppeteer';
+import { launch } from "rebrowser-puppeteer"
+import Sequelize, { NUMBER, STRING } from "sequelize"
 
 export const sequelize = new Sequelize({
-    dialect: 'sqlite',
+    dialect: "sqlite",
     logging: false,
-    storage: 'chickensmoothie.db',
-});
+    storage: "chickensmoothie.db",
+})
 
-export const PetDB = sequelize.define('ChickenSmoothiePetArchive', {
-    petID: {
-        type: STRING,
-        unique: true,
-        primaryKey: true,
+export const PetDB = sequelize.define(
+    "ChickenSmoothiePetArchive",
+    {
+        petID: {
+            type: STRING,
+            unique: true,
+            primaryKey: true,
+        },
+        petYear: NUMBER,
+        petEvent: STRING,
+        petLink: STRING,
     },
-    petYear: NUMBER,
-    petEvent: STRING,
-    petLink: STRING,
-}, {
-    freezeTableName: true,
-    timestamps: false,
-});
+    {
+        freezeTableName: true,
+        timestamps: false,
+    },
+)
 
-export const ItemDB = sequelize.define('ChickenSmoothieItemArchive', {
-    itemLID: {
-        type: STRING,
-        unique: true,
-        primaryKey: true,
+export const ItemDB = sequelize.define(
+    "ChickenSmoothieItemArchive",
+    {
+        itemLID: {
+            type: STRING,
+            unique: true,
+            primaryKey: true,
+        },
+        itemRID: {
+            type: STRING,
+            unique: true,
+        },
+        itemName: STRING,
+        itemYear: NUMBER,
+        itemEvent: STRING,
+        itemLink: STRING,
     },
-    itemRID: {
-        type: STRING,
-        unique: true,
+    {
+        freezeTableName: true,
+        timestamps: false,
     },
-    itemName: STRING,
-    itemYear: NUMBER,
-    itemEvent: STRING,
-    itemLink: STRING,
-}, {
-    freezeTableName: true,
-    timestamps: false,
-});
+)
 
 export const getPoundTime = async () => {
-    const browser = await launch({userDataDir: './chrome_data'});
-    const page = await browser.newPage();
+    const browser = await launch({ userDataDir: "./chrome_data" })
+    const page = await browser.newPage()
     await page.setRequestInterception(true)
-    page.on('request', (request) => {
-        if (request.resourceType() === 'image') request.abort()
+    page.on("request", (request) => {
+        if (request.resourceType() === "image") request.abort()
         else request.continue()
     })
-    await page.goto('https://www.chickensmoothie.com/poundandlostandfound.php', {waitUntil: 'domcontentloaded'});
-    const element = await page.$('h2:last-of-type');
-    let text = (await element.evaluate(el => el.textContent)).trim();
+    await page.goto(
+        "https://www.chickensmoothie.com/poundandlostandfound.php",
+        {
+            waitUntil: "domcontentloaded",
+        },
+    )
+    const element = await page.$("h2:last-of-type")
+    let text = (await element.evaluate((el) => el.textContent)).trim()
     const correction = {
         "Sorry, the pound is closed at the moment.": "",
         "Sorry, the Lost and Found is closed at the moment.": "",
         "\n": "",
         "\t": "",
     }
-    const reg = new RegExp(Object.keys(correction).join("|"), "g");
-    await browser.close();
-    return text.replace(reg, (matched) => correction[matched]);
+    const reg = new RegExp(Object.keys(correction).join("|"), "g")
+    await browser.close()
+    return text.replace(reg, (matched) => correction[matched])
 }
