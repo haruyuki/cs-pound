@@ -88,13 +88,13 @@ const getItem = async (itemLID, itemRID) => {
 }
 
 function replyWithDetails(name, event, year, link, isItem = true) {
-    const isMonth = MONTHS.includes(event);
-    const entityType = isItem ? "item" : "pet";
+    const isMonth = MONTHS.includes(event)
+    const entityType = isItem ? "item" : "pet"
 
-    const namePart = name ? `'${name}' ` : "";
-    const eventPart = isMonth ? `${event} ${year}` : `${year} ${event}`;
+    const namePart = name ? `'${name}' ` : ""
+    const eventPart = isMonth ? `${event} ${year}` : `${year} ${event}`
 
-    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link}`;
+    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link}`
 }
 
 const createAttachment = async (link) => {
