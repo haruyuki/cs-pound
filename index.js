@@ -55,6 +55,7 @@ async function loadEvents() {
         } else {
             client.on(event.name, (...args) => event.execute(...args))
         }
+        console.log(`Event ${event.name} loaded from ${filePath}.`)
     }
 }
 
