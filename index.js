@@ -1,4 +1,4 @@
-import { promises as fsPromises, readdirSync } from "node:fs"
+import { readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { Client, Collection, GatewayIntentBits } from "discord.js"
