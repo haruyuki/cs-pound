@@ -3,7 +3,7 @@ import fetch from "node-fetch"
 
 import { ItemDB, PetDB } from "../../lib.js"
 
-const months = [
+const MONTHS = [
     "January",
     "February",
     "March",
@@ -17,7 +17,7 @@ const months = [
     "November",
     "December",
 ]
-const exceptions = [
+const EXCEPTIONS = [
     "3B46301A6C8B850D87A730DA365B0960",
     "E5FEFE44A3070BC9FC176503EC1A603F",
     "0C1AFF9AEAA0953F1B1F9B818C2771C9",
@@ -53,86 +53,111 @@ export async function execute(interaction) {
         return
     }
 
+    if (link.includes("trans")) {
+        await interaction.reply(
+            "Pets with items are unable to be identified :frowning:",
+        )
+        return
+    }
+
+    if (!link.includes("k=")) {
+        await interaction.reply(
+            "There was an error parsing the link you provided, are you sure you provided a valid link?",
+        )
+        return
+    }
+
     if (link.includes("item")) {
-        const matches = link.match(/item\/(\d+)(?:&p=(\d+))?\.jpg/)
-        const itemLID = matches[1]
-        const itemRID = matches[2] ? matches[2] : 0
-        let item
-        if (itemRID === 0) {
-            item = await ItemDB.findOne({ where: { itemLID: itemLID } })
-        } else {
-            item = await ItemDB.findOne({
-                where: { itemLID: itemLID, itemRID: itemRID },
-            })
-        }
+        const { reply, attachment } = await identifyItem(link)
+        await interaction.reply({ content: reply, files: [attachment] })
+        return
+    }
 
-        if (item === null) {
-            await interaction.reply(
-                "There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet.",
-            )
-            return
-        }
+    const { reply, attachment } = await identifyPet(link)
+    await interaction.reply({ content: reply, files: [attachment] })
+}
 
-        const response = await fetch(link)
-        const arrayBuffer = await response.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-        const attachment = new AttachmentBuilder(buffer, { name: "item.png" })
-        if (item.get("itemName") === null) {
-            await interaction.reply({
-                content: months.includes(item.get("itemEvent"))
-                    ? `That item is a ${item.get("itemEvent")} ${item.get("itemYear")} item!\nArchive Link: ${item.get("itemLink")}`
-                    : `That item is a ${item.get("itemYear")} ${item.get("itemEvent")} item!\nArchive Link: ${item.get("itemLink")}`,
-                files: [attachment],
-            })
-        } else {
-            await interaction.reply({
-                content: months.includes(item.get("itemEvent"))
-                    ? `That item is \'${item.get("itemName")}\' from ${item.get("itemEvent")} ${item.get("itemYear")}!\nArchive Link: ${item.get("itemLink")}`
-                    : `That item is \'${item.get("itemName")}\' from ${item.get("itemYear")} ${item.get("itemEvent")}!\nArchive Link: ${item.get("itemLink")}`,
-                files: [attachment],
-            })
-        }
+const getItem = async (itemLID, itemRID) => {
+    if (itemRID === 0) {
+        return await ItemDB.findOne({ where: { itemLID: itemLID } })
     } else {
-        if (link.includes("trans")) {
-            await interaction.reply(
-                "Pets with items are unable to be identified :frowning:",
-            )
-            return
-        } else if (!link.includes("k=")) {
-            await interaction.reply(
-                "There was an error parsing the link you provided, are you sure you provided a valid link?",
-            )
-            return
-        }
-        const url = new URL(link)
-        const params = new URLSearchParams(url.search)
-        const petID = params.get("k")
-
-        if (exceptions.includes(petID)) {
-            await interaction.reply(
-                "That pet is not identifiable at this growth stage :frowning:",
-            )
-            return
-        }
-
-        const pet = await PetDB.findOne({ where: { petID: petID } })
-
-        if (pet === null) {
-            await interaction.reply(
-                "There is no data for this pet yet :frowning:\nPlease note that current year pets don't have data yet.",
-            )
-            return
-        }
-
-        const response = await fetch(link)
-        const arrayBuffer = await response.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-        const attachment = new AttachmentBuilder(buffer, { name: "pet.png" })
-        await interaction.reply({
-            content: months.includes(pet.get("petEvent"))
-                ? `That pet is a ${pet.get("petEvent")} ${pet.get("petYear")} pet!\nArchive Link: ${pet.get("petLink")}`
-                : `That pet is a ${pet.get("petYear")} ${pet.get("petEvent")} pet!\nArchive Link: ${pet.get("petLink")}`,
-            files: [attachment],
+        return await ItemDB.findOne({
+            where: { itemLID: itemLID, itemRID: itemRID },
         })
     }
+}
+
+function replyWithDetails(name, event, year, link, isItem = true) {
+    const isMonth = MONTHS.includes(event);
+    const entityType = isItem ? "item" : "pet";
+
+    const namePart = name ? `'${name}' ` : "";
+    const eventPart = isMonth ? `${event} ${year}` : `${year} ${event}`;
+
+    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link}`;
+}
+
+const createAttachment = async (link) => {
+    const response = await fetch(link)
+    const arrayBuffer = await response.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    return new AttachmentBuilder(buffer, { name: "image.png" })
+}
+
+async function identifyItem(link) {
+    const matches = link.match(/item\/(\d+)(?:&p=(\d+))?\.jpg/)
+    const itemLID = matches[1]
+    const itemRID = matches[2] || 0
+
+    const item = await getItem(itemLID, itemRID)
+
+    if (!item) {
+        return {
+            reply: "There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet.",
+            attachment: null,
+        }
+    }
+
+    const attachment = await createAttachment(link)
+    const reply = replyWithDetails(
+        item.get("itemName"),
+        item.get("itemEvent"),
+        item.get("itemYear"),
+        item.get("itemLink"),
+    )
+
+    return { reply, attachment }
+}
+
+async function identifyPet(link) {
+    const url = new URL(link)
+    const params = new URLSearchParams(url.search)
+    const petID = params.get("k")
+
+    if (EXCEPTIONS.includes(petID)) {
+        return {
+            reply: "That pet is not identifiable at this growth stage :frowning:",
+            attachment: null,
+        }
+    }
+
+    const pet = await PetDB.findOne({ where: { petID: petID } })
+
+    if (!pet) {
+        return {
+            reply: "There is no data for this pet yet :frowning:\nPlease note that current year pets don't have data yet.",
+            attachment: null,
+        }
+    }
+
+    const attachment = await createAttachment(link)
+    const reply = replyWithDetails(
+        null,
+        pet.get("petEvent"),
+        pet.get("petYear"),
+        pet.get("petLink"),
+        false,
+    )
+
+    return { reply, attachment }
 }
