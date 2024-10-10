@@ -77,16 +77,6 @@ export async function execute(interaction) {
     await interaction.reply({ content: reply, files: [attachment] })
 }
 
-const getItem = async (itemLID, itemRID) => {
-    if (itemRID === 0) {
-        return await ItemDB.findOne({ where: { itemLID: itemLID } })
-    } else {
-        return await ItemDB.findOne({
-            where: { itemLID: itemLID, itemRID: itemRID },
-        })
-    }
-}
-
 function replyWithDetails(name, event, year, link, isItem = true) {
     const isMonth = MONTHS.includes(event)
     const entityType = isItem ? "item" : "pet"
@@ -107,9 +97,11 @@ const createAttachment = async (link) => {
 async function identifyItem(link) {
     const matches = link.match(/item\/(\d+)(?:&p=(\d+))?\.jpg/)
     const itemLID = matches[1]
-    const itemRID = matches[2] || 0
+    const itemRID = matches[2] || null
 
-    const item = await getItem(itemLID, itemRID)
+    const item = ItemDB.findOne({
+        where: itemRID == null ? { itemLID } : { itemLID, itemRID },
+    })
 
     if (!item) {
         return {
