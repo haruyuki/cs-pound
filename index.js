@@ -4,6 +4,8 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { Client, Collection, GatewayIntentBits } from "discord.js"
 import dotenv from "dotenv"
 
+import { Logger } from "./logger.js"
+
 dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
@@ -28,12 +30,10 @@ async function loadCommands() {
             const command = await import(filePath) // Dynamic import inside async function
             if ("data" in command && "execute" in command) {
                 client.commands.set(command.data.name, command)
-                console.log(
-                    `Command ${command.data.name} loaded from ${filePath}.`,
-                )
+                Logger.success(`Loaded command: ${command.data.name}`)
             } else {
-                console.error(
-                    `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
+                Logger.warn(
+                    'The command at ${filePath} is missing a required "data" or "execute" property.',
                 )
             }
         }
@@ -55,7 +55,7 @@ async function loadEvents() {
         } else {
             client.on(event.name, (...args) => event.execute(...args))
         }
-        console.log(`Event ${event.name} loaded from ${filePath}.`)
+        Logger.success(`Ran event: ${event.name}`)
     }
 }
 

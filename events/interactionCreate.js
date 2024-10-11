@@ -1,5 +1,7 @@
 import { Events } from "discord.js"
 
+import { Logger } from "../logger.js"
+
 export const name = Events.InteractionCreate
 
 export async function execute(interaction) {
@@ -8,7 +10,7 @@ export async function execute(interaction) {
     const command = interaction.client.commands.get(interaction.commandName)
 
     if (!command) {
-        console.error(
+        Logger.error(
             `No command matching ${interaction.commandName} was found.`,
         )
         return
@@ -17,7 +19,7 @@ export async function execute(interaction) {
     try {
         await command.execute(interaction)
     } catch (error) {
-        console.error(error)
+        Logger.error(error)
         if (interaction.replied || interaction.deferred) {
             await interaction.followUp({
                 content: "There was an error while executing this command!",

@@ -4,6 +4,8 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { REST, Routes } from "discord.js"
 import dotenv from "dotenv"
 
+import { Logger } from "./logger.js"
+
 dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
@@ -25,8 +27,8 @@ async function loadCommands() {
             if ("data" in command && "execute" in command) {
                 commands.push(command.data.toJSON())
             } else {
-                console.log(
-                    `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
+                Logger.warn(
+                    `The command at ${filePath} is missing a required "data" or "execute" property.`,
                 )
             }
         }
@@ -35,9 +37,7 @@ async function loadCommands() {
     const rest = new REST().setToken(process.env.DISCORD_TOKEN)
 
     try {
-        console.log(
-            `Started refreshing ${commands.length} application (/) commands.`,
-        )
+        Logger.info(`Started refreshing ${commands.length} slash commands.`)
 
         const data = await rest.put(
             Routes.applicationGuildCommands(
@@ -48,15 +48,13 @@ async function loadCommands() {
             { body: commands },
         )
 
-        console.log(
-            `Successfully reloaded ${data.length} application (/) commands.`,
-        )
+        Logger.success(`Successfully reloaded ${data.length} slash commands.`)
     } catch (error) {
-        console.error(error)
+        Logger.warn(error)
     }
 }
 
-loadCommands().then(() => console.log("Commands deployed!"))
+loadCommands()
 
 // for guild-based commands
 // rest.delete(Routes.applicationGuildCommand(clientID, guildID, commandID))
