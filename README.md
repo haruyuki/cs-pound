@@ -8,18 +8,18 @@ A Discord bot for the virtual pet adoption website [Chicken Smoothie](https://ww
 
 ## Features
 
-| Command  | Description                                                                        | Example                                                              |
-|----------|----------------------------------------------------------------------------------  |----------------------------------------------------------------------|
-| identify | Tells you the archive page where a pet or item is located                          | /identify <https://www.chickensmoothie.com/viewpet.php?id=109085729> |
-| remindme | Pings you after specified amount of time. Maximum reminding time is 24h            | /remindme 1h6m23s<br>/remindme 12m<br>/remindme 1h10s                |
-| stats    | Displays CS Pound bot statistics                                                   | /statistics                                                          |
-| time     | Tells you how long before the pound opens                                          | /time                                                                |
+| Command  | Description                                                             | Example                                                              |
+| -------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| identify | Tells you the archive page where a pet or item is located               | /identify <https://www.chickensmoothie.com/viewpet.php?id=109085729> |
+| remindme | Pings you after specified amount of time. Maximum reminding time is 24h | /remindme 1h6m23s<br>/remindme 12m<br>/remindme 1h10s                |
+| stats    | Displays CS Pound bot statistics                                        | /statistics                                                          |
+| time     | Tells you how long before the pound opens                               | /time                                                                |
 
 ## Usage
+
 I would prefer if you don't your run own instance of my bot, but rather use the already existing instance. Head to <https://haruyuki.moe/cs-pound/> and click the button on the top right (or below the title if you're on mobile), to invite the bot to your server.
 
 ## Contributors
-
 
 ## License
 
