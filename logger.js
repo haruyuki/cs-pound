@@ -13,19 +13,27 @@ const levels = {
     debug: chalk.magenta,
 }
 
+const white = chalk.white
+
 export const Logger = {
     info: (message) =>
-        console.log(`${levels.info(`[INFO ${getTimestamp()}]: ${message}`)}`),
+        console.log(
+            `${levels.info(`[${getTimestamp()}] INFO:`)} ${white(message)}`,
+        ),
     warn: (message) =>
-        console.warn(`${levels.warn(`[WARN ${getTimestamp()}]: ${message}`)}`),
+        console.warn(
+            `${levels.warn(`[${getTimestamp()}] WARN:`)} ${white(message)}`,
+        ),
     error: (message) =>
         console.error(
-            `${levels.error(`[ERROR ${getTimestamp()}]: ${message}`)}`,
+            `${levels.error(`[${getTimestamp()}] ERROR:`)} ${white(message)}`,
         ),
     success: (message) =>
         console.log(
-            `${levels.success(`[SUCCESS ${getTimestamp()}]: ${message}`)}`,
+            `${levels.success(`[${getTimestamp()}] SUCCESS:`)} ${white(message)}`,
         ),
     debug: (message) =>
-        console.log(`${levels.debug(`[DEBUG ${getTimestamp()}]: ${message}`)}`),
+        console.log(
+            `${levels.debug(`[${getTimestamp()}] DEBUG:`)} ${white(message)}`,
+        ),
 }
