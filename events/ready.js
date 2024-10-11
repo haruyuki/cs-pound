@@ -1,6 +1,6 @@
 import { Events } from "discord.js"
 
-import { ItemDB, PetDB, sequelize } from "../lib.js"
+import { ItemDB, login, PetDB, sequelize } from "../lib.js"
 import { Logger } from "../logger.js"
 
 export const name = Events.ClientReady
@@ -20,5 +20,7 @@ export async function execute(client) {
     await ItemDB.sync()
     Logger.success("Synced ItemDB")
 
-    console.info(`Ready! Logged in as ${client.user.tag}`)
+    await login()
+
+    Logger.info(`Ready! Logged in as ${client.user.tag}`)
 }
