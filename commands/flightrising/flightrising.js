@@ -48,11 +48,7 @@ export async function execute(interaction) {
 
     if (subcommand === "gems") {
         const cs = convertCurrency(amount, gemExchangeRate, csExchangeRate)
-        const treasure = convertCurrency(
-            amount,
-            1,
-            treasureExchangeRate,
-        )
+        const treasure = convertCurrency(amount, 1, treasureExchangeRate)
 
         interaction.reply(
             `${amount} gems is equal to approximately:\n${cs}C$\n${treasure} treasure\n(Based on the ratio 1C$:${csExchangeRate}g and 1g:${gemExchangeRate}t)`,
@@ -60,11 +56,7 @@ export async function execute(interaction) {
     }
 
     if (subcommand === "treasure") {
-        const gems = convertCurrency(
-            amount,
-            treasureExchangeRate,
-            1,
-        )
+        const gems = convertCurrency(amount, treasureExchangeRate, 1)
         const cs = convertCurrency(gems, gemExchangeRate, csExchangeRate)
 
         interaction.reply(
@@ -74,11 +66,7 @@ export async function execute(interaction) {
 
     if (subcommand === "cs") {
         const gems = convertCurrency(amount, csExchangeRate, gemExchangeRate)
-        const treasure = convertCurrency(
-            gems,
-            1,
-            treasureExchangeRate,
-        )
+        const treasure = convertCurrency(gems, 1, treasureExchangeRate)
 
         interaction.reply(
             `${amount}C$ is equal to approximately:\n${gems} gems\n${treasure} treasure\n(Based on the ratio 1C$:${csExchangeRate}g and 1g:${gemExchangeRate}t)`,
