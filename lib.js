@@ -1,7 +1,11 @@
+import dotenv from "dotenv"
+import { google } from "googleapis"
 import { launch } from "rebrowser-puppeteer"
 import Sequelize, { NUMBER, STRING } from "sequelize"
 
 import { Logger } from "./logger.js"
+
+dotenv.config()
 
 export const BOT_VERSION = "2024.10.09"
 export const HEADERS = {
@@ -109,4 +113,15 @@ export const login = async () => {
     await browser.close()
     Logger.success("Logged in successfully!")
     return true
+}
+
+export const authenticate = function () {
+    const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+    const auth = new google.auth.JWT(
+        credentials.client_email,
+        null,
+        credentials.private_key,
+        ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    )
+    return google.sheets({ version: "v4", auth })
 }
