@@ -60,7 +60,7 @@ export const ItemDB = sequelize.define(
     },
 )
 
-export const getPoundTime = async () => {
+export const getOpeningTime = async () => {
     const browser = await launch({ userDataDir: "./chrome_data" })
     const page = await browser.newPage()
     await page.setExtraHTTPHeaders(HEADERS)
@@ -77,15 +77,43 @@ export const getPoundTime = async () => {
     )
     const element = await page.$("h2:last-of-type")
     let text = (await element.evaluate((el) => el.textContent)).trim()
-    const correction = {
-        "Sorry, the pound is closed at the moment.": "",
-        "Sorry, the Lost and Found is closed at the moment.": "",
-        "\n": "",
-        "\t": "",
-    }
-    const reg = new RegExp(Object.keys(correction).join("|"), "g")
     await browser.close()
-    return text.replace(reg, (matched) => correction[matched])
+
+    if (text === "The Pound") {
+        return { openingType: "pound", timeRemaining: 0 }
+    }
+    if (text === "The Lost and Found") {
+        return { openingType: "lost and found", timeRemaining: 0 }
+    }
+
+    const match = text.match(
+        /(pound|lost and found).*?(?:in:|within)\s*(?:(\d+)\s*hours?)?\s*(?:,?\s*(\d+)\s*minutes?)?/i,
+    )
+
+    if (match) {
+        const openingType = match[1].toLowerCase() // Capture the type (pound or lost and found)
+
+        const hours = match[2] ? parseInt(match[2]) : 0 // Capture the hours, default to 0 if not present
+        const minutes = match[3] ? parseInt(match[3]) : 0 // Capture the minutes, default to 0 if not present
+
+        // Convert everything to minutes
+        const timeInMinutes = hours * 60 + minutes
+
+        return {
+            openingType: openingType,
+            timeRemaining: timeInMinutes,
+        }
+    }
+
+    return null // Return null if the pattern is not found
+}
+
+export function formatter([h, m, s]) {
+    return [
+        h ? `${h} hour${h > 1 ? "s" : ""}${m || s ? ", " : ""}` : "",
+        m ? `${m} minute${m > 1 ? "s" : ""}${s ? " and " : ""}` : "",
+        s ? `${h || m ? "and " : ""}${s} second${s > 1 ? "s" : ""}` : "",
+    ].join("")
 }
 
 export const login = async () => {

@@ -1,39 +1,50 @@
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js"
+import { SlashCommandBuilder } from "discord.js"
 
-import { getPoundTime } from "../../lib.js"
+import { getOpeningTime } from "../../lib.js"
 
 export const data = new SlashCommandBuilder()
     .setName("time")
     .setDescription("Tells you how long until the pound/lost & found opens.")
 
 export async function execute(interaction) {
-    const text = await getPoundTime()
+    const openingTime = await getOpeningTime()
 
-    if (text === "The Pound") {
+    if (openingTime === null) {
         await interaction.reply(
-            "Pound is currently open! [Go adopt a pet from the Pound!](https://www.chickensmoothie.com/poundandlostandfound.php)",
+            "Sorry, both the Pound and Lost and Found are closed at the moment.",
         )
         return
     }
 
-    if (text === "The Lost and Found") {
+    const openingType =
+        openingTime.openingType === "pound" ? "Pound" : "Lost and Found"
+
+    if (openingTime.timeRemaining === 0) {
         await interaction.reply(
-            "Lost and Found is currently open! [Go adopt a pet from the Lost and Found!](https://www.chickensmoothie.com/poundandlostandfound.php)",
+            `The ${openingType} is currently open! [Go adopt a pet from the ${openingType}!](https://www.chickensmoothie.com/poundandlostandfound.php)`,
         )
         return
     }
 
-    const timeEmbed = new EmbedBuilder()
-        .setColor(0x4ba139)
-        .setURL("https://www.chickensmoothie.com/poundandlostandfound.php")
-        .setDescription(text)
-    if (text.includes("Pound")) {
-        timeEmbed.setTitle("Pound")
-    } else if (text.includes("Lost and Found")) {
-        timeEmbed.setTitle("Lost and Found")
+    const hours = Math.floor(openingTime.timeRemaining / 60)
+    const minutes = openingTime.timeRemaining % 60
+
+    let result = ""
+
+    if (hours > 0) {
+        result += `The ${openingType} will open ${hours > 1 ? "within" : "in:"} ${hours} ${hours > 1 ? "hours" : "hour"}`
+    }
+
+    if (minutes > 0) {
+        // If there are hours, format the minutes accordingly
+        if (hours > 0) {
+            result += `, ${minutes} ${minutes > 1 ? "minutes" : "minute"}.`
+        } else {
+            result += `The ${openingType} will open in: ${minutes} ${minutes > 1 ? "minutes" : "minute"}.`
+        }
     } else {
-        timeEmbed.setTitle("Error")
-        timeEmbed.setColor(0xff0000)
+        result += "."
     }
-    await interaction.reply({ embeds: [timeEmbed] })
+
+    await interaction.reply(result.trim())
 }

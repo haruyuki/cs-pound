@@ -1,12 +1,6 @@
 import { SlashCommandBuilder } from "discord.js"
 
-function formatter([h, m, s]) {
-    return [
-        h ? `${h} hour${h > 1 ? "s" : ""}${m || s ? ", " : ""}` : "",
-        m ? `${m} minute${m > 1 ? "s" : ""}${s ? " and " : ""}` : "",
-        s ? `${h || m ? "and " : ""}${s} second${s > 1 ? "s" : ""}` : "",
-    ].join("")
-}
+import { formatter } from "../../lib.js"
 
 function parseTimeString(amount) {
     const times = { h: 0, m: 0, s: 0 }

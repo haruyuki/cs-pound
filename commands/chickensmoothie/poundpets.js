@@ -2,7 +2,7 @@ import * as fs from "node:fs"
 import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
 import puppeteer, { launch } from "rebrowser-puppeteer"
 
-import { getPoundTime, HEADERS, login } from "../../lib.js"
+import { getOpeningTime, HEADERS, login } from "../../lib.js"
 import { Logger } from "../../logger.js"
 
 let imageGenerated = false
@@ -38,7 +38,7 @@ export async function execute(interaction) {
         return
     }
 
-    const text = await getPoundTime()
+    const text = await getOpeningTime()
     if (text === "The Lost and Found") {
         await interaction.reply("The next opening is not the Pound!")
         return
