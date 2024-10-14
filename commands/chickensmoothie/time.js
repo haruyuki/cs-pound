@@ -21,7 +21,7 @@ export async function execute(interaction) {
 
     if (openingTime.timeRemaining === 0) {
         await interaction.reply(
-            `The ${openingType} is currently open with ${openingTime.thingsRemaining} ${openingType === "Pound" ? "pets" : "items"} remaining! [Go adopt a pet from the ${openingType}!](https://www.chickensmoothie.com/poundandlostandfound.php)`,
+            `The ${openingType} is currently open with ${openingTime.thingsRemaining} ${openingType === "Pound" ? "pets" : "items"} remaining! [Go ${openingType === "Pound" ? "adopt a pet" : "get an item"} from the ${openingType}!](https://www.chickensmoothie.com/poundandlostandfound.php)`,
         )
         return
     }
