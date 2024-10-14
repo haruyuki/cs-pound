@@ -61,7 +61,9 @@ async function loadEvents() {
 
 // Login and initialization
 async function init() {
+    Logger.info("Loading commands...")
     await loadCommands()
+    Logger.info("Loading events...")
     await loadEvents()
     await client.login(process.env.DISCORD_TOKEN)
 }
