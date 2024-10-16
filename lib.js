@@ -77,15 +77,17 @@ export const getOpeningTime = async () => {
     )
     const element = await page.$("h2:last-of-type")
     let text = (await element.evaluate((el) => el.textContent)).trim()
-    let thingsRemaining
-    const selector =
-        text === "The Pound" ? "#pets_remaining" : "#items_remaining"
-    thingsRemaining = await page.$(selector)
-    thingsRemaining = parseInt(
-        (await thingsRemaining.evaluate((el) => el.textContent))
-            .trim()
-            .match(/\d+/)[0],
-    )
+    let thingsRemaining = 0
+    if (text === "The Pound" || text === "The Lost and Found") {
+        const selector =
+            text === "The Pound" ? "#pets_remaining" : "#items_remaining"
+        thingsRemaining = await page.$(selector)
+        thingsRemaining = parseInt(
+            (await thingsRemaining.evaluate((el) => el.textContent))
+                .trim()
+                .match(/\d+/)[0],
+        )
+    }
     await browser.close()
 
     if (text === "The Pound") {
@@ -110,7 +112,12 @@ export const getOpeningTime = async () => {
     if (match) {
         const openingType = match[1].toLowerCase() // Capture the type (pound or lost and found)
 
-        const hours = match[2] ? parseInt(match[2]) : 0 // Capture the hours, default to 0 if not present
+        const hours = match[2]
+            ? match[2] === "10"
+                ? 1
+                : parseInt(match[2])
+            : 0 // Capture the hours, default to 0 if not present
+
         const minutes = match[3] ? parseInt(match[3]) : 0 // Capture the minutes, default to 0 if not present
 
         // Convert everything to minutes
@@ -119,7 +126,7 @@ export const getOpeningTime = async () => {
         return {
             openingType: openingType,
             timeRemaining: timeInMinutes,
-            thingsRemaining: 0,
+            thingsRemaining: thingsRemaining,
         }
     }
 
