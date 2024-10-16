@@ -1,9 +1,14 @@
 import dotenv from "dotenv"
 import { google } from "googleapis"
+import { MongoClient } from "mongodb"
 import { launch } from "rebrowser-puppeteer"
 import Sequelize, { NUMBER, STRING } from "sequelize"
 
 import { Logger } from "./logger.js"
+
+const client = new MongoClient(process.env.MONGODB_URI)
+const database = client.db("cs_pound")
+const collection = database.collection("auto_remind")
 
 dotenv.config()
 
@@ -12,6 +17,8 @@ export const HEADERS = {
     "User-Agent": "CS Pound Discord Bot Agent " + BOT_VERSION,
     From: "haru@haruyuki.moe",
 }
+export let POUND_REMIND_TIMES = []
+export let LAF_REMIND_TIMES = []
 
 export const sequelize = new Sequelize({
     dialect: "sqlite",
@@ -59,6 +66,11 @@ export const ItemDB = sequelize.define(
         timestamps: false,
     },
 )
+
+export const updateAutoRemindTimes = async () => {
+    POUND_REMIND_TIMES = await collection.distinct("pound")
+    LAF_REMIND_TIMES = await collection.distinct("laf")
+}
 
 export const getOpeningTime = async () => {
     const browser = await launch({ userDataDir: "./chrome_data" })
@@ -176,4 +188,13 @@ export const authenticate = function () {
         ["https://www.googleapis.com/auth/spreadsheets.readonly"],
     )
     return google.sheets({ version: "v4", auth })
+}
+
+export const getAutoRemindDocuments = async function (time, openingType) {
+    if (openingType === "pound") {
+        return await collection.find({ pound: time }).toArray()
+    }
+    if (openingType === "lost and found") {
+        return await collection.find({ laf: time }).toArray()
+    }
 }

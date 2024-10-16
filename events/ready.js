@@ -1,7 +1,14 @@
 import { Events } from "discord.js"
 
-import { ItemDB, login, PetDB, sequelize } from "../lib.js"
+import {
+    ItemDB,
+    login,
+    PetDB,
+    sequelize,
+    updateAutoRemindTimes,
+} from "../lib.js"
 import { Logger } from "../logger.js"
+import { openingCountdown } from "../tasks/openingCountdown.js"
 
 export const name = Events.ClientReady
 export const once = true
@@ -23,6 +30,12 @@ export async function execute(client) {
 
     Logger.info("Logging in to Chicken Smoothie...")
     await login()
+
+    Logger.info("Setting auto remind times...")
+    await updateAutoRemindTimes()
+
+    Logger.info("Running openingCountdown background task...")
+    await openingCountdown(client)
 
     Logger.info(`Ready! Logged in as ${client.user.tag}`)
 }
