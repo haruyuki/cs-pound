@@ -5,6 +5,9 @@ import puppeteer, { launch } from "rebrowser-puppeteer"
 import { getOpeningTime, HEADERS, login } from "../../lib.js"
 import { Logger } from "../../logger.js"
 
+const POUND_URL =
+    "https://www.chickensmoothie.com/accounts/viewgroup.php?userid=2887&groupid=5813&pageSize=3000"
+
 let imageGenerated = false
 let imageGenerating = false
 let imageStage = 1
@@ -15,42 +18,40 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     if (imageGenerated) {
-        const raresImage = new AttachmentBuilder("rares.png", {
-            name: "rares.png",
-        })
-        const raresPlusImage = new AttachmentBuilder("raresPlus.png", {
-            name: "raresPlus.png",
-        })
         await interaction.reply({
-            files: [raresPlusImage, raresImage],
+            files: [
+                new AttachmentBuilder("raresPlus.png", {
+                    name: "raresPlus.png",
+                }),
+                new AttachmentBuilder("rares.png", { name: "rares.png" }),
+            ],
         })
         return
     }
     if (imageGenerating) {
-        let message =
-            "Another user already ran this command!\\nCurrent status: "
-        if (imageStage === 1) {
-            message += "Collecting pets to check..."
-        } else if (imageStage === 2) {
-            message += "Generating image..."
-        }
-        await interaction.reply(message)
-        return
-    }
-
-    const text = await getOpeningTime()
-    if (text === "The Lost and Found") {
-        await interaction.reply("The next opening is not the Pound!")
-        return
-    } else if (text === "The Pound") {
         await interaction.reply(
-            "An image cannot be generated while the pound is still open!",
+            "Another user already ran this command!\nPlease try again in a minute.",
         )
         return
     }
 
-    await interaction.deferReply()
     imageGenerating = true
+
+    const openingDetails = await getOpeningTime()
+    if (openingDetails.openingType === "The Lost and Found") {
+        await interaction.reply("The next opening is not the Pound!")
+        imageGenerating = false
+        return
+    } else if (openingDetails.openingType === "The Pound") {
+        await interaction.reply(
+            "An image cannot be generated while the pound is still open!",
+        )
+        imageGenerating = false
+        return
+    }
+
+    await interaction.deferReply()
+
     const loggedIn = await login()
 
     if (!loggedIn) {
@@ -60,9 +61,7 @@ export async function execute(interaction) {
     const browser = await launch({ userDataDir: "./chrome_data" })
     const page = await browser.newPage()
     await page.setExtraHTTPHeaders(HEADERS)
-    await page.goto(
-        "https://www.chickensmoothie.com/accounts/viewgroup.php?userid=2887&groupid=5813&pageSize=3000",
-    )
+    await page.goto(POUND_URL)
 
     const rarePets = await page.evaluate(() => {
         let allPets = []
@@ -106,6 +105,9 @@ export async function execute(interaction) {
 
     interaction.editReply({ files: [raresPlusImage, raresImage] })
 
+    Logger.debug(
+        `Deleting image after: ${openingDetails.timeRemaining} minutes`,
+    )
     setTimeout(async () => {
         try {
             // Delete the first file if it exists
@@ -129,7 +131,7 @@ export async function execute(interaction) {
         imageGenerated = false
         imageGenerating = false
         imageStage = 1
-    }, 10800000) // 3 hours in milliseconds
+    }, openingDetails.timeRemaining * 60000)
 }
 
 async function generateImage(pets, filename = "poundpets") {
