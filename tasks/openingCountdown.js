@@ -76,8 +76,8 @@ export async function openingCountdown(client) {
                 // Send reminders for all channels
                 channelIDs.forEach((channelID) => {
                     setTimeout(
-                        () =>
-                            sendReminderToChannel(
+                        async () =>
+                            await sendReminderToChannel(
                                 client,
                                 channelID,
                                 timeRemaining,
@@ -99,16 +99,16 @@ export async function openingCountdown(client) {
 }
 
 // Helper function to send reminders
-function sendReminderToChannel(
+async function sendReminderToChannel(
     client,
     channelID,
     timeRemaining,
     openingType,
     documents,
 ) {
-    Logger.debug(`Sending message to channel ${channelID}`);
+    Logger.debug(`Attempting to send message to channel ${channelID}`);
 
-    const messagePrefix = `${timeRemaining + 1} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `;
+    const messagePrefix = `${timeRemaining} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `;
     const filteredUsers = documents.map((doc) => `<@${doc.user_id}>`);
 
     const maxMessageLength = 2000;
@@ -116,130 +116,46 @@ function sendReminderToChannel(
     let currentMessageLength = messagePrefix.length;
     let usersBatch = [];
 
-    filteredUsers.forEach((user) => {
-        if (currentMessageLength + user.length + 1 > maxMessageLength) {
-            // Send the current message if adding the next user exceeds the limit
-            Logger.debug(`Message to send: ${currentMessage} ${usersBatch.join(" ")}`);
-            // Uncomment to send the message
-            // const sendingChannel = client.channels.cache.get(channelID);
-            // if (sendingChannel) sendingChannel.send(currentMessage + usersBatch.join(" "));
+    // First, try to get the channel from the cache
+    let channel = client.channels.cache.get(channelID);
 
-            // Reset for the next message batch
-            currentMessage = messagePrefix;
-            currentMessageLength = messagePrefix.length;
-            usersBatch = [];
+    // If the channel is not in cache, fetch it from the API
+    if (!channel) {
+        Logger.debug(`Channel ${channelID} not found in cache, fetching from API`);
+        try {
+            channel = await client.channels.fetch(channelID);
+        } catch (error) {
+            Logger.error(`Failed to fetch channel ${channelID}: ${error.message}`);
+            return; // Exit the function if the channel couldn't be fetched
         }
+    }
 
-        // Add the current user to the message batch
-        usersBatch.push(user);
-        currentMessageLength += user.length + 1; // +1 for the space
-    });
+    // If the channel is successfully retrieved, proceed with sending messages
+    if (channel) {
+        filteredUsers.forEach((user, index) => {
+            if (currentMessageLength + user.length + 1 > maxMessageLength) {
+                // Send the current message if adding the next user exceeds the limit
+                Logger.debug(`Message to send: ${currentMessage} ${usersBatch.join(" ")}`);
+                channel.send(currentMessage + usersBatch.join(" "));  // Sending the message
 
-    // Send any remaining users in the last message
-    if (usersBatch.length > 0) {
-        Logger.debug(`Message to send: ${currentMessage} ${usersBatch.join(" ")}`);
-        // Uncomment to send the message
-        // const sendingChannel = client.channels.cache.get(channelID);
-        // if (sendingChannel) sendingChannel.send(currentMessage + usersBatch.join(" "));
+                // Reset for the next message batch
+                currentMessage = messagePrefix;
+                currentMessageLength = messagePrefix.length;
+                usersBatch = [];
+            }
+
+            // Add the current user to the message batch
+            usersBatch.push(user);
+            currentMessageLength += user.length + 1; // +1 for the space
+        });
+
+        // Send any remaining users in the last message
+        if (usersBatch.length > 0) {
+            Logger.debug(`Message to send: ${currentMessage} ${usersBatch.join(" ")}`);
+            channel.send(currentMessage + usersBatch.join(" "));  // Sending the final message batch
+        }
+    } else {
+        Logger.error(`Channel ${channelID} could not be found or fetched`);
     }
 }
 
-// export async function openingCountdown(client) {
-//     Logger.info("Running opening countdown background task")
-//     if (!lessThanOneHourRemaining) {
-//         Logger.debug("Task not on cooldown")
-//         const openingTime = await getOpeningTime()
-//         Logger.debug("Retrieved opening time")
-//
-//         let openingType;
-//         let timeRemaining;
-//         if (openingTime != null) {
-//             openingType = openingTime.openingType
-//             timeRemaining = openingTime.timeRemaining
-//         }
-//
-//         if (timeRemaining === 0) {
-//             Logger.debug(`The ${openingType} is currently open`)
-//             timeoutTime = 60
-//         } else if (timeRemaining >= 120) {
-//             Logger.debug("Opening time is greater than 2 hours")
-//             timeoutTime = timeRemaining - 120
-//         } else if (timeRemaining > 60) {
-//             Logger.debug("Opening time is within 2 hours")
-//             timeoutTime = timeRemaining - 60
-//         } else {
-//             Logger.debug(
-//                 "Opening time is less than 60 minutes, setting COOLDOWN and using local timer",
-//             )
-//             lessThanOneHourRemaining = true
-//         }
-//         Logger.debug(`Cooldown time set to ${timeoutTime} minutes`)
-//     }
-//
-//     if (timeRemaining === 0) {
-//         Logger.debug(`The ${openingType} is currently open, disabling COOLDOWN`)
-//         lessThanOneHourRemaining = false
-//     } else {
-//         if (lessThanOneHourRemaining) {
-//             Logger.debug(
-//                 `Checking if any messages need to be sent at ${timeRemaining} minutes for the ${openingType}`,
-//             )
-//             const CURRENT_REMIND_TIMES =
-//                 openingType === "pound" ? POUND_REMIND_TIMES : LAF_REMIND_TIMES
-//             Logger.debug(CURRENT_REMIND_TIMES)
-//             if (CURRENT_REMIND_TIMES.includes(timeRemaining)) {
-//                 Logger.debug(
-//                     `There are users at ${timeRemaining} minutes that need reminding`,
-//                 )
-//                 const documents = await getAutoRemindDocuments(
-//                     timeRemaining,
-//                     openingType,
-//                 )
-//                 const channelIDs = new Set(
-//                     documents.map((doc) => doc.channel_id),
-//                 )
-//                 channelIDs.delete(0);
-//                 Logger.debug(`Channel IDs: ${Array.from(channelIDs)}`)
-//
-//                 let delay = 5
-//                 channelIDs.forEach((channelID) => {
-//                     let timeoutTime
-//                     if (delay === 0) {
-//                         delay = 5
-//                         timeoutTime = 1000
-//                     } else {
-//                         timeoutTime = 0
-//                         delay--
-//                     }
-//
-//                     setTimeout(() => {
-//                         Logger.debug(`Sending message to channel ${channelID}`)
-//                         // const sendingChannel =
-//                         //     client.channels.cache.get("486055557598412806")
-//                         let message = `${timeRemaining} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `
-//                         const filteredDocuments = documents
-//                             .filter(
-//                                 (doc) =>
-//                                     doc[
-//                                         openingType === "pound"
-//                                             ? "pound"
-//                                             : "laf"
-//                                     ] === timeRemaining &&
-//                                     doc.channel_id === channelID,
-//                             )
-//                             .map((doc) => `<@${doc.user_id}>`)
-//                         message += filteredDocuments.join(" ")
-//                         Logger.debug(`Message to send: ${message}`)
-//                         // sendingChannel.send(message)
-//                     }, timeoutTime)
-//                 })
-//             }
-//             Logger.debug("Setting cooldownTime to 1 minute to run again")
-//             timeoutTime = 1
-//             timeRemaining--
-//         }
-//         Logger.debug(`Time remaining: ${timeRemaining}`)
-//     }
-//
-//     setTimeout(openingCountdown, timeoutTime * 60000)
-// }
