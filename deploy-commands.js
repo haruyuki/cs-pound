@@ -40,13 +40,23 @@ async function loadCommands() {
         Logger.info(`Started refreshing ${commands.length} slash commands.`)
 
         const data = await rest.put(
-            Routes.applicationGuildCommands(
-                process.env.CLIENT_ID,
-                process.env.GUILD_ID,
-            ),
-            // Routes.applicationCommands(clientID),
+            // Routes.applicationGuildCommands(
+            //     process.env.CLIENT_ID,
+            //     process.env.GUILD_ID,
+            // ),
+            Routes.applicationCommands(process.env.CLIENT_ID),
             { body: commands },
         )
+
+        // for guild-based commands
+        // rest.delete(Routes.applicationGuildCommand(clientID, guildID, commandID))
+        //     .then(() => console.log('Successfully deleted guild command'))
+        //     .catch(console.error);
+
+        // for global commands
+        // rest.delete(Routes.applicationCommand(process.env.CLIENT_ID, "1217717341023113247"))
+        //     .then(() => console.log('Successfully deleted application command'))
+        //     .catch(console.error);
 
         Logger.success(`Successfully reloaded ${data.length} slash commands.`)
     } catch (error) {
@@ -55,13 +65,3 @@ async function loadCommands() {
 }
 
 loadCommands()
-
-// for guild-based commands
-// rest.delete(Routes.applicationGuildCommand(clientID, guildID, commandID))
-//     .then(() => console.log('Successfully deleted guild command'))
-//     .catch(console.error);
-
-// for global commands
-// rest.delete(Routes.applicationCommand(clientID, commandID))
-//     .then(() => console.log('Successfully deleted application command'))
-//     .catch(console.error);
