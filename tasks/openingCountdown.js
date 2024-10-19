@@ -49,7 +49,9 @@ export async function openingCountdown(client) {
 
     // If within 1 hour, enter the cooldown loop
     if (lessThanOneHourRemaining) {
-        Logger.debug(`Less than 1 hour remaining (${timeRemaining}), checking for reminders`)
+        Logger.debug(
+            `Less than 1 hour remaining (${timeRemaining}), checking for reminders`,
+        )
         if (timeRemaining === 0) {
             Logger.debug(`The ${openingType} is now open, disabling COOLDOWN`)
             lessThanOneHourRemaining = false
@@ -58,7 +60,9 @@ export async function openingCountdown(client) {
         } else {
             let CURRENT_REMIND_TIMES =
                 openingType === "pound" ? POUND_REMIND_TIMES : LAF_REMIND_TIMES
-            CURRENT_REMIND_TIMES = CURRENT_REMIND_TIMES.filter(time => time !== 0)
+            CURRENT_REMIND_TIMES = CURRENT_REMIND_TIMES.filter(
+                (time) => time !== 0,
+            )
 
             // Only fetch reminders when timeRemaining matches a reminder time
             if (CURRENT_REMIND_TIMES.includes(timeRemaining)) {
@@ -106,27 +110,31 @@ async function sendReminderToChannel(
     openingType,
     documents,
 ) {
-    Logger.debug(`Attempting to send message to channel ${channelID}`);
+    Logger.debug(`Attempting to send message to channel ${channelID}`)
 
-    const messagePrefix = `${timeRemaining} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `;
-    const filteredUsers = documents.map((doc) => `<@${doc.user_id}>`);
+    const messagePrefix = `${timeRemaining} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `
+    const filteredUsers = documents.map((doc) => `<@${doc.user_id}>`)
 
-    const maxMessageLength = 2000;
-    let currentMessage = messagePrefix;
-    let currentMessageLength = messagePrefix.length;
-    let usersBatch = [];
+    const maxMessageLength = 2000
+    let currentMessage = messagePrefix
+    let currentMessageLength = messagePrefix.length
+    let usersBatch = []
 
     // First, try to get the channel from the cache
-    let channel = client.channels.cache.get(channelID);
+    let channel = client.channels.cache.get(channelID)
 
     // If the channel is not in cache, fetch it from the API
     if (!channel) {
-        Logger.debug(`Channel ${channelID} not found in cache, fetching from API`);
+        Logger.debug(
+            `Channel ${channelID} not found in cache, fetching from API`,
+        )
         try {
-            channel = await client.channels.fetch(channelID);
+            channel = await client.channels.fetch(channelID)
         } catch (error) {
-            Logger.error(`Failed to fetch channel ${channelID}: ${error.message}`);
-            return; // Exit the function if the channel couldn't be fetched
+            Logger.error(
+                `Failed to fetch channel ${channelID}: ${error.message}`,
+            )
+            return // Exit the function if the channel couldn't be fetched
         }
     }
 
@@ -135,27 +143,30 @@ async function sendReminderToChannel(
         filteredUsers.forEach((user, index) => {
             if (currentMessageLength + user.length + 1 > maxMessageLength) {
                 // Send the current message if adding the next user exceeds the limit
-                Logger.debug(`Message to send: ${currentMessage} ${usersBatch.join(" ")}`);
-                channel.send(currentMessage + usersBatch.join(" "));  // Sending the message
+                Logger.debug(
+                    `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
+                )
+                channel.send(currentMessage + usersBatch.join(" ")) // Sending the message
 
                 // Reset for the next message batch
-                currentMessage = messagePrefix;
-                currentMessageLength = messagePrefix.length;
-                usersBatch = [];
+                currentMessage = messagePrefix
+                currentMessageLength = messagePrefix.length
+                usersBatch = []
             }
 
             // Add the current user to the message batch
-            usersBatch.push(user);
-            currentMessageLength += user.length + 1; // +1 for the space
-        });
+            usersBatch.push(user)
+            currentMessageLength += user.length + 1 // +1 for the space
+        })
 
         // Send any remaining users in the last message
         if (usersBatch.length > 0) {
-            Logger.debug(`Message to send: ${currentMessage} ${usersBatch.join(" ")}`);
-            channel.send(currentMessage + usersBatch.join(" "));  // Sending the final message batch
+            Logger.debug(
+                `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
+            )
+            channel.send(currentMessage + usersBatch.join(" ")) // Sending the final message batch
         }
     } else {
-        Logger.error(`Channel ${channelID} could not be found or fetched`);
+        Logger.error(`Channel ${channelID} could not be found or fetched`)
     }
 }
-
