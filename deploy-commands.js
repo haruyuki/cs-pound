@@ -52,12 +52,12 @@ async function loadCommands() {
 
         // for guild-based commands
         // rest.delete(Routes.applicationGuildCommand(process.env.CLIENT_ID, process.env.GUILD_ID, commandID))
-        //     .then(() => console.log('Successfully deleted guild command'))
+        //     .then(() => Logger.success('Successfully deleted guild command'))
         //     .catch(console.error);
 
         // for global commands
         // rest.delete(Routes.applicationCommand(process.env.CLIENT_ID, commandID))
-        //     .then(() => console.log('Successfully deleted application command'))
+        //     .then(() => Logger.success('Successfully deleted application command'))
         //     .catch(console.error);
 
         Logger.success(`Successfully reloaded ${data.length} slash commands.`)
