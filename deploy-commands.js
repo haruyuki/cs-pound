@@ -48,13 +48,15 @@ async function loadCommands() {
             { body: commands },
         )
 
+        const commandID = ""
+
         // for guild-based commands
-        // rest.delete(Routes.applicationGuildCommand(clientID, guildID, commandID))
+        // rest.delete(Routes.applicationGuildCommand(process.env.CLIENT_ID, process.env.GUILD_ID, commandID))
         //     .then(() => console.log('Successfully deleted guild command'))
         //     .catch(console.error);
 
         // for global commands
-        // rest.delete(Routes.applicationCommand(process.env.CLIENT_ID, "1217717341023113247"))
+        // rest.delete(Routes.applicationCommand(process.env.CLIENT_ID, commandID))
         //     .then(() => console.log('Successfully deleted application command'))
         //     .catch(console.error);
 
