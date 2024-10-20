@@ -8,7 +8,6 @@ import { Logger } from "../../logger.js"
 
 let imageGenerated = false
 let imageGenerating = false
-let imageStage = 1
 
 export const data = new SlashCommandBuilder()
     .setName("poundpets")
@@ -53,7 +52,6 @@ export async function execute(interaction) {
     Logger.debug("Fetching rare pets from the pound")
     const rarePets = await getRarePoundPets()
 
-    imageStage = 2
     const rares = await generateImage(
         rarePets.filter((pet) => pet[1] === "Rare"),
         "rares.png",
@@ -62,6 +60,14 @@ export async function execute(interaction) {
         rarePets.filter((pet) => pet[1] !== "Rare"),
         "raresPlus.png",
     )
+
+    if (rares == null || raresPlus == null) {
+        await interaction.editReply(
+            "There was an error generating the image. Please contact the developer.",
+        )
+        imageGenerating = false
+        return
+    }
 
     const raresImage = new AttachmentBuilder(rares, { name: "rares.png" })
     const raresPlusImage = new AttachmentBuilder(raresPlus, {
@@ -83,7 +89,7 @@ export async function execute(interaction) {
                         Logger.error(err)
                     } else Logger.info(`${rares} was deleted`)
                 })
-                console.log(`${rares} was deleted`)
+                Logger.info(`${rares} was deleted`)
 
                 // Delete the second file if it exists
                 unlink(raresPlus, (err) => {
@@ -91,13 +97,12 @@ export async function execute(interaction) {
                         Logger.error(err)
                     } else Logger.info(`${raresPlus} was deleted`)
                 })
-                console.log(`${raresPlus} was deleted`)
+                Logger.info(`${raresPlus} was deleted`)
             } catch (error) {
-                console.error("Error deleting files:", error)
+                Logger.error("Error deleting files:", error)
             }
             imageGenerated = false
             imageGenerating = false
-            imageStage = 1
         },
         (openingDetails.timeRemaining + 90) * 60000,
     )
@@ -127,8 +132,10 @@ async function generateImage(pets, filename) {
             )
             const petImageHeight = petImageMetadata.height
 
-            if (!petImage)
-                throw new Error(`Failed to load pet image from ${petImagePath}`)
+            if (!petImage) {
+                Logger.error(`Failed to load pet image from ${petImagePath}`)
+                return null
+            }
 
             // Create text buffer for adoption date
             const adoptionDateBuffer = await sharp({
@@ -151,10 +158,12 @@ async function generateImage(pets, filename) {
                 .png()
                 .toBuffer()
 
-            if (!adoptionDateBuffer)
-                throw new Error(
+            if (!adoptionDateBuffer) {
+                Logger.error(
                     `Failed to create text buffer for adoption date: ${adoptionDate}`,
                 )
+                return null
+            }
 
             // Extract the correct region from the atlas image based on rarity
             let rarityImage
@@ -173,7 +182,8 @@ async function generateImage(pets, filename) {
                     .png()
                     .toBuffer()
             } else {
-                throw new Error(`Unknown rarity: ${rarity}`)
+                Logger.error(`Unknown rarity: ${rarity}`)
+                return null
             }
 
             // Ensure rarity image matches the pet image width by adding transparent padding
@@ -218,12 +228,13 @@ async function generateImage(pets, filename) {
 
             columnImages.push(stackedImage) // Push each stacked image to the column array
         } catch (error) {
-            console.error(`Error processing entry: ${error.message}`)
+            Logger.error(`Error processing entry: ${error.message}`)
         }
     }
 
     if (columnImages.length === 0) {
-        throw new Error("No valid images were processed.")
+        Logger.error("No valid images were processed.")
+        return null
     }
 
     let totalWidth = 0
@@ -289,6 +300,6 @@ async function generateImage(pets, filename) {
         .png()
         .toFile(filename)
 
-    Logger.info(`Image saved to ${filename}`)
+    Logger.success(`Image saved to ${filename}`)
     return filename
 }
