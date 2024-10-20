@@ -1,12 +1,10 @@
-import * as fs from "node:fs"
+import { unlink } from "node:fs"
 import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
-import puppeteer, { launch } from "rebrowser-puppeteer"
+import fetch from "node-fetch"
+import sharp from "sharp"
 
-import { getOpeningTime, HEADERS, login } from "../../lib.js"
+import { getOpeningTime, getRarePoundPets } from "../../lib.js"
 import { Logger } from "../../logger.js"
-
-const POUND_URL =
-    "https://www.chickensmoothie.com/accounts/viewgroup.php?userid=2887&groupid=5813&pageSize=3000"
 
 let imageGenerated = false
 let imageGenerating = false
@@ -52,49 +50,17 @@ export async function execute(interaction) {
 
     await interaction.deferReply()
 
-    const loggedIn = await login()
-
-    if (!loggedIn) {
-        Logger.error("Failed to log in to ChickenSmoothie.")
-        return
-    }
-    const browser = await launch({ userDataDir: "./chrome_data" })
-    const page = await browser.newPage()
-    await page.setExtraHTTPHeaders(HEADERS)
-    await page.goto(POUND_URL)
-
-    const rarePets = await page.evaluate(() => {
-        let allPets = []
-        document.querySelectorAll("dl.pet").forEach((pet) => {
-            const petRarity = pet.querySelector(".pet-rarity img")
-                ? pet.querySelector(".pet-rarity img").alt
-                : null
-            if (
-                petRarity === "Rare" ||
-                petRarity === "Very rare" ||
-                petRarity === "Extremely rare" ||
-                petRarity === "OMG so rare!"
-            ) {
-                const petAdoption =
-                    pet.querySelector(".pet-adoption-date").textContent
-                const petImageURL = new URL(pet.querySelector("dt a img").src)
-                petImageURL.searchParams.set("bg", "e0f6b2")
-                const petImage = petImageURL.toString()
-                allPets.push([petAdoption, petRarity, petImage])
-            }
-        })
-        return allPets
-    })
-    await browser.close()
+    Logger.debug("Fetching rare pets from the pound")
+    const rarePets = await getRarePoundPets()
 
     imageStage = 2
     const rares = await generateImage(
         rarePets.filter((pet) => pet[1] === "Rare"),
-        "rares",
+        "rares.png",
     )
     const raresPlus = await generateImage(
         rarePets.filter((pet) => pet[1] !== "Rare"),
-        "raresPlus",
+        "raresPlus.png",
     )
 
     const raresImage = new AttachmentBuilder(rares, { name: "rares.png" })
@@ -106,149 +72,223 @@ export async function execute(interaction) {
     interaction.editReply({ files: [raresPlusImage, raresImage] })
 
     Logger.debug(
-        `Deleting image after: ${openingDetails.timeRemaining} minutes`,
+        `Deleting image after: ${openingDetails.timeRemaining + 90} minutes`,
     )
-    setTimeout(async () => {
+    setTimeout(
+        async () => {
+            try {
+                // Delete the first file if it exists
+                unlink(rares, (err) => {
+                    if (err) {
+                        Logger.error(err)
+                    } else Logger.info(`${rares} was deleted`)
+                })
+                console.log(`${rares} was deleted`)
+
+                // Delete the second file if it exists
+                unlink(raresPlus, (err) => {
+                    if (err) {
+                        Logger.error(err)
+                    } else Logger.info(`${raresPlus} was deleted`)
+                })
+                console.log(`${raresPlus} was deleted`)
+            } catch (error) {
+                console.error("Error deleting files:", error)
+            }
+            imageGenerated = false
+            imageGenerating = false
+            imageStage = 1
+        },
+        (openingDetails.timeRemaining + 90) * 60000,
+    )
+}
+
+async function fetchImage(url) {
+    const response = await fetch(url)
+    const arrayBuffer = await response.arrayBuffer()
+    return sharp(Buffer.from(arrayBuffer)) // Convert arrayBuffer to Buffer for sharp
+}
+
+async function generateImage(pets, filename) {
+    const maxRowWidth = 1920
+    const columnImages = []
+    const BG_COLOUR = { r: 224, g: 246, b: 178, alpha: 1 }
+
+    for (let [petImagePath, rarity, adoptionDate] of pets) {
         try {
-            // Delete the first file if it exists
-            fs.unlink(rares, (err) => {
-                if (err) {
-                    Logger.error(err)
-                } else Logger.info(`${rares} was deleted`)
-            })
-            console.log(`${rares} was deleted`)
+            // Load pet image and get its metadata
+            const petImageData = await fetchImage(petImagePath)
+            const petImageMetadata = await petImageData.metadata()
+            const petImage = await petImageData.toBuffer()
+            const petImageWidth =
+                petImageMetadata.width < 111 ? 111 : petImageMetadata.width
+            const petImageWidthDiff = Math.floor(
+                (petImageWidth - petImageMetadata.width) / 2,
+            )
+            const petImageHeight = petImageMetadata.height
 
-            // Delete the second file if it exists
-            fs.unlink(raresPlus, (err) => {
-                if (err) {
-                    Logger.error(err)
-                } else Logger.info(`${raresPlus} was deleted`)
+            if (!petImage)
+                throw new Error(`Failed to load pet image from ${petImagePath}`)
+
+            // Create text buffer for adoption date
+            const adoptionDateBuffer = await sharp({
+                create: {
+                    width: petImageWidth, // match the pet image width
+                    height: 16,
+                    channels: 4,
+                    background: BG_COLOUR, // RGBA for background color
+                },
             })
-            console.log(`${raresPlus} was deleted`)
+                .composite([
+                    {
+                        input: Buffer.from(
+                            `<svg width="${petImageWidth}" height="16"><text x="50%" y="12" font-size="12" text-anchor="middle" font-family="Verdana" fill="black">${adoptionDate}</text></svg>`,
+                        ),
+                        top: 0,
+                        left: 0,
+                    },
+                ])
+                .png()
+                .toBuffer()
+
+            if (!adoptionDateBuffer)
+                throw new Error(
+                    `Failed to create text buffer for adoption date: ${adoptionDate}`,
+                )
+
+            // Extract the correct region from the atlas image based on rarity
+            let rarityImage
+            const rarityRegion = {
+                Rare: { top: 210, left: 0, width: 111, height: 30 },
+                "Very rare": { top: 240, left: 0, width: 111, height: 30 },
+                "Extremely rare": { top: 270, left: 0, width: 111, height: 30 },
+                "OMG so rare!": { top: 300, left: 0, width: 111, height: 30 },
+            }
+
+            if (rarityRegion[rarity]) {
+                rarityImage = await fetchImage(
+                    "https://www.chickensmoothie.com/img/rarity/starbars-light.png",
+                )
+                    .extract(rarityRegion[rarity])
+                    .png()
+                    .toBuffer()
+            } else {
+                throw new Error(`Unknown rarity: ${rarity}`)
+            }
+
+            // Ensure rarity image matches the pet image width by adding transparent padding
+            const paddedRarityImage = await sharp({
+                create: {
+                    width: petImageWidth, // Match the pet image width
+                    height: 30, // Fixed height for rarity image
+                    channels: 4,
+                    background: BG_COLOUR, // RGBA for background color
+                },
+            })
+                .composite([
+                    {
+                        input: rarityImage,
+                        left: Math.floor((petImageWidth - 111) / 2),
+                        top: 0,
+                    },
+                ]) // Center rarity image
+                .png()
+                .toBuffer()
+
+            // Stack the pet image, adoption date, and rarity image vertically
+            const stackedImage = await sharp({
+                create: {
+                    width: petImageWidth, // Pet image width
+                    height: petImageHeight + 16 + 30, // Pet image height + adoption date + rarity image
+                    channels: 4,
+                    background: BG_COLOUR, // RGBA for background color
+                },
+            })
+                .composite([
+                    { input: petImage, top: 0, left: petImageWidthDiff }, // Pet image at the top
+                    { input: adoptionDateBuffer, top: petImageHeight, left: 0 }, // Adoption date below pet image
+                    {
+                        input: paddedRarityImage,
+                        top: petImageHeight + 16,
+                        left: 0,
+                    }, // Rarity image below the adoption date
+                ])
+                .png()
+                .toBuffer()
+
+            columnImages.push(stackedImage) // Push each stacked image to the column array
         } catch (error) {
-            console.error("Error deleting files:", error)
+            console.error(`Error processing entry: ${error.message}`)
         }
-        imageGenerated = false
-        imageGenerating = false
-        imageStage = 1
-    }, openingDetails.timeRemaining * 60000)
-}
-
-async function generateImage(pets, filename = "poundpets") {
-    const browser = await puppeteer.launch({
-        userDataDir: "./chrome_data",
-        args: ["--disable-lcd-text"],
-    })
-    const page = await browser.newPage()
-    await page.setExtraHTTPHeaders(HEADERS)
-    const pageWidth = 1920
-
-    await page.setViewport({ width: pageWidth, height: 800 })
-
-    await page.setContent(`
-        <html lang="en">
-        <head>
-            <style>
-                body {
-                    background-color: #e0f6b2;
-                    margin: 0;
-                    padding: 0;
-                    font-family: Verdana, Helvetica, Arial, sans-serif;
-                    font-size: 12px;
-                }
-                .container {
-                    width: ${pageWidth}px;
-                }
-                ul {
-                    display: flex;
-                    flex-wrap: wrap;
-                    list-style-type: none;
-                    padding: 0;
-                    margin: 0;
-                    align-items: flex-end;
-                    line-height: 1.3em;
-                }
-                .pet-details {
-                    text-align: center;
-                    margin: 4px;
-                    color: #202020;
-                }
-                .rarity-bar {
-                    width: 111px;
-                    height: 30px;
-                    background-image: url("https://www.chickensmoothie.com/img/rarity/starbars-light-2x.png");
-                    background-repeat: no-repeat;
-                    background-size: 111px;
-                }
-                .rare {
-                    background-position: 0 -210px;
-                }
-                .very-rare {
-                    background-position: 0 -240px;
-                }
-                .extremely-rare {
-                    background-position: 0 -270px;
-                }
-                .omg-so-rare {
-                    background-position: 0 -300px;
-                }
-            </style>
-            <title>Pound Pets</title>
-        </head>
-        <body>
-            <div class="container">
-                <ul>
-                    ${pets
-                        .map(
-                            (pet) => `
-                        <li class="pet-details">
-                            <img src="${pet[2]}" alt="" />
-                            <div class="pet-adoption">${pet[0]}</div>
-                            <div class="pet-rarity">
-                                <img class="rarity-bar ${getRarityImage(pet[1])}" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" alt=""/>
-                            </div>
-                        </li>
-                    `,
-                        )
-                        .join("")}
-                </ul>
-            </div>
-            
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    const petImages = document.querySelectorAll('.pet-image');
-
-                    petImages.forEach(img => {
-                        img.onload = function() {
-                            img.style.width = img.naturalWidth + 'px';
-                            img.style.height = img.naturalHeight + 'px';
-                        };
-                    });
-                });
-            </script>
-        </body>
-        </html>
-    `)
-    await page.waitForSelector("img")
-
-    await page.screenshot({
-        path: `${filename}.png`,
-        fullPage: true,
-    })
-
-    await browser.close()
-    return `${filename}.png`
-}
-
-function getRarityImage(rarity) {
-    switch (rarity) {
-        case "Rare":
-            return "rare"
-        case "Very rare":
-            return "very-rare"
-        case "Extremely rare":
-            return "extremely-rare"
-        case "OMG so rare!":
-            return "omg-so-rare"
     }
+
+    if (columnImages.length === 0) {
+        throw new Error("No valid images were processed.")
+    }
+
+    let totalWidth = 0
+    let currentRowHeight = 0
+    let compositeImages = []
+    let rowImages = []
+
+    // Loop through the images to create rows
+    for (const img of columnImages) {
+        const { width, height } = await sharp(img).metadata()
+
+        // If adding this image exceeds the max width, start a new row
+        if (totalWidth + width > maxRowWidth) {
+            compositeImages.push({ row: rowImages, height: currentRowHeight })
+            rowImages = []
+            totalWidth = 0
+            currentRowHeight = 0
+        }
+
+        // Add image to the current row
+        rowImages.push({ input: img, top: 0, left: totalWidth, height: height })
+        totalWidth += width
+        currentRowHeight = Math.max(currentRowHeight, height)
+    }
+
+    // Push the last row into the composite image
+    if (rowImages.length > 0) {
+        compositeImages.push({ row: rowImages, height: currentRowHeight })
+    }
+
+    // Calculate the total height and width of the final image
+    const finalWidth = maxRowWidth
+    const finalHeight = compositeImages.reduce(
+        (sum, { height }) => sum + height,
+        0,
+    )
+
+    // Composite rows vertically
+    let currentTop = 0
+    const compositeFinalImage = []
+
+    for (const { row, height } of compositeImages) {
+        row.forEach((image) => {
+            compositeFinalImage.push({
+                input: image.input,
+                left: image.left,
+                top: currentTop + (height - image.height),
+            })
+        })
+        currentTop += height
+    }
+
+    // Create the final image
+    await sharp({
+        create: {
+            width: finalWidth,
+            height: finalHeight,
+            channels: 4,
+            background: BG_COLOUR, // Match the background color used elsewhere
+        },
+    })
+        .composite(compositeFinalImage)
+        .png()
+        .toFile(filename)
+
+    Logger.info(`Image saved to ${filename}`)
+    return filename
 }
