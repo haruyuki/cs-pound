@@ -140,7 +140,7 @@ async function sendReminderToChannel(
 
     // If the channel is successfully retrieved, proceed with sending messages
     if (channel) {
-        filteredUsers.forEach((user, index) => {
+        filteredUsers.forEach((user) => {
             if (currentMessageLength + user.length + 1 > maxMessageLength) {
                 // Send the current message if adding the next user exceeds the limit
                 Logger.debug(
