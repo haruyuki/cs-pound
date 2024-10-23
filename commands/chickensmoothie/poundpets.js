@@ -1,4 +1,4 @@
-import { unlink } from "node:fs"
+import { existsSync, unlink } from "node:fs"
 import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
 import fetch from "node-fetch"
 import sharp from "sharp"
@@ -6,7 +6,7 @@ import sharp from "sharp"
 import { getOpeningTime, getRarePoundPets } from "../../lib.js"
 import { Logger } from "../../logger.js"
 
-let imageGenerated = false
+let imageGenerated = existsSync("rares.png") && existsSync("raresPlus.png")
 let imageGenerating = false
 
 export const data = new SlashCommandBuilder()
@@ -53,11 +53,11 @@ export async function execute(interaction) {
     const rarePets = await getRarePoundPets()
 
     const rares = await generateImage(
-        rarePets.filter((pet) => pet[1] === "Rare"),
+        rarePets.filter((pet) => pet[2] === "Rare"),
         "rares.png",
     )
     const raresPlus = await generateImage(
-        rarePets.filter((pet) => pet[1] !== "Rare"),
+        rarePets.filter((pet) => pet[2] !== "Rare"),
         "raresPlus.png",
     )
 
@@ -111,15 +111,16 @@ export async function execute(interaction) {
 async function fetchImage(url) {
     const response = await fetch(url)
     const arrayBuffer = await response.arrayBuffer()
-    return sharp(Buffer.from(arrayBuffer)) // Convert arrayBuffer to Buffer for sharp
+    return sharp(arrayBuffer) // Convert arrayBuffer to sharp
 }
 
 async function generateImage(pets, filename) {
+    Logger.debug(`Generating image: ${filename}`)
     const maxRowWidth = 1920
     const columnImages = []
     const BG_COLOUR = { r: 224, g: 246, b: 178, alpha: 1 }
 
-    for (let [petImagePath, rarity, adoptionDate] of pets) {
+    for (let [petImagePath, adoptionDate, rarity] of pets) {
         try {
             // Load pet image and get its metadata
             const petImageData = await fetchImage(petImagePath)
@@ -175,9 +176,7 @@ async function generateImage(pets, filename) {
             }
 
             if (rarityRegion[rarity]) {
-                rarityImage = await fetchImage(
-                    "https://www.chickensmoothie.com/img/rarity/starbars-light.png",
-                )
+                rarityImage = await sharp("./starbars-light.png")
                     .extract(rarityRegion[rarity])
                     .png()
                     .toBuffer()
