@@ -8,12 +8,16 @@ A Discord bot for the virtual pet adoption website [Chicken Smoothie](https://ww
 
 ## Features
 
-| Command  | Description                                                             | Example                                                              |
-| -------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| identify | Tells you the archive page where a pet or item is located               | /identify <https://www.chickensmoothie.com/viewpet.php?id=109085729> |
-| remindme | Pings you after specified amount of time. Maximum reminding time is 24h | /remindme 1h6m23s<br>/remindme 12m<br>/remindme 1h10s                |
-| stats    | Displays CS Pound bot statistics                                        | /statistics                                                          |
-| time     | Tells you how long before the pound opens                               | /time                                                                |
+| Command      | Description                                                             | Example                                                              |
+|--------------|-------------------------------------------------------------------------|----------------------------------------------------------------------|
+| autoremind   | Set or cancel auto reminders for the pound and laf                      | /autoremind 5m                                                       |
+| identify     | Identify a pet or item to see what year/event it is from.               | /identify <https://static.chickensmoothie.com/item/4645&p=16796.jpg> |
+| poundpets    | Get the list of pets in the pound                                       | /poundpets                                                           |
+| time         | Tells you how long until the pound/lost & found opens.                  | /time                                                                |
+| flightrising | Commands related to Flight Rising.                                      | /flightrising cs 50                                                  |
+| remindme     | Pings you after specified amount of time. Maximum reminding time is 24h | /remindme 12m                                                        |
+| stats        | Displays CS Pound bot statistics                                        | /statistics                                                          |
+| support      | Sends you a link to the CS-Pound Dev Server.                            | /support                                                             |
 
 ## Usage
 
