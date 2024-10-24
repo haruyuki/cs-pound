@@ -60,16 +60,16 @@ export async function execute(interaction) {
         return
     }
 
+    if (link.includes("item")) {
+        const { reply, attachment } = await identifyItem(link)
+        await interaction.reply({ content: reply, files: [attachment] })
+        return
+    }
+
     if (!link.includes("k=")) {
         await interaction.reply(
             "There was an error parsing the link you provided, are you sure you provided a valid link?",
         )
-        return
-    }
-
-    if (link.includes("item")) {
-        const { reply, attachment } = await identifyItem(link)
-        await interaction.reply({ content: reply, files: [attachment] })
         return
     }
 
@@ -98,19 +98,21 @@ async function identifyItem(link) {
     const matches = link.match(/item\/(\d+)(?:&p=(\d+))?\.jpg/)
     const itemLID = matches[1]
     const itemRID = matches[2] || null
+    const attachment = await createAttachment(link)
 
-    const item = ItemDB.findOne({
+    const item = await ItemDB.findOne({
         where: itemRID == null ? { itemLID } : { itemLID, itemRID },
     })
 
     if (!item) {
+        const reply =
+            "There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet."
         return {
-            reply: "There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet.",
-            attachment: null,
+            reply,
+            attachment,
         }
     }
 
-    const attachment = await createAttachment(link)
     const reply = replyWithDetails(
         item.get("itemName"),
         item.get("itemEvent"),
@@ -125,24 +127,28 @@ async function identifyPet(link) {
     const url = new URL(link)
     const params = new URLSearchParams(url.search)
     const petID = params.get("k")
+    const attachment = await createAttachment(link)
 
     if (EXCEPTIONS.includes(petID)) {
+        const reply =
+            "That pet is not identifiable at this growth stage :frowning:"
         return {
-            reply: "That pet is not identifiable at this growth stage :frowning:",
-            attachment: null,
+            reply,
+            attachment,
         }
     }
 
     const pet = await PetDB.findOne({ where: { petID: petID } })
 
     if (!pet) {
+        const reply =
+            "There is no data for this pet yet :frowning:\nPlease note that current year pets don't have data yet."
         return {
-            reply: "There is no data for this pet yet :frowning:\nPlease note that current year pets don't have data yet.",
-            attachment: null,
+            reply,
+            attachment,
         }
     }
 
-    const attachment = await createAttachment(link)
     const reply = replyWithDetails(
         null,
         pet.get("petEvent"),
