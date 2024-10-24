@@ -15,12 +15,13 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     if (imageGenerated) {
-        await interaction.reply({
+        await interaction.deferReply()
+        await interaction.editReply({
             files: [
-                new AttachmentBuilder("raresPlus.png", {
+                new AttachmentBuilder("./raresPlus.png", {
                     name: "raresPlus.png",
                 }),
-                new AttachmentBuilder("rares.png", { name: "rares.png" }),
+                new AttachmentBuilder("./rares.png", { name: "rares.png" }),
             ],
         })
         return
@@ -69,8 +70,8 @@ export async function execute(interaction) {
         return
     }
 
-    const raresImage = new AttachmentBuilder(rares, { name: "rares.png" })
-    const raresPlusImage = new AttachmentBuilder(raresPlus, {
+    const raresImage = new AttachmentBuilder(`./${rares}`, { name: "rares.png" })
+    const raresPlusImage = new AttachmentBuilder(`./${raresPlus}`, {
         name: "raresPlus.png",
     })
     imageGenerated = true
