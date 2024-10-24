@@ -7,11 +7,10 @@ export const data = new SlashCommandBuilder()
     .setDescription("Tells you how long until the pound/lost & found opens.")
 
 export async function execute(interaction) {
-    await interaction.deferReply()
     const openingTime = await getOpeningTime()
 
     if (openingTime === null) {
-        await interaction.editReply(
+        await interaction.reply(
             "Sorry, both the Pound and Lost and Found are closed at the moment.",
         )
         return
@@ -21,7 +20,7 @@ export async function execute(interaction) {
         openingTime.openingType === "pound" ? "Pound" : "Lost and Found"
 
     if (openingTime.timeRemaining === 0) {
-        await interaction.editReply(
+        await interaction.reply(
             `The ${openingType} is currently open with ${openingTime.thingsRemaining} ${openingType === "Pound" ? "pets" : "items"} remaining! [Go ${openingType === "Pound" ? "adopt a pet" : "get an item"} from the ${openingType}!](https://www.chickensmoothie.com/poundandlostandfound.php)`,
         )
         return
@@ -47,5 +46,5 @@ export async function execute(interaction) {
         result += "."
     }
 
-    await interaction.editReply(result.trim())
+    await interaction.reply(result.trim())
 }
