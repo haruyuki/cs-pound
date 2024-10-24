@@ -48,9 +48,10 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     const amount = interaction.options.getString("time")
-    const data = parseTimeString(amount)
-    const milliseconds = (data[0] * 60 * 60 + data[1] * 60 + data[2]) * 1000
-    if (data.every((value) => value === 0)) {
+    const parsedTime = parseTimeString(amount)
+    const milliseconds =
+        (parsedTime[0] * 60 * 60 + parsedTime[1] * 60 + parsedTime[2]) * 1000
+    if (parsedTime.every((value) => value === 0)) {
         return await interaction.reply({
             content:
                 "Invalid time format. Please provide a valid time format (e.g., 10s, 5m, 1h, 1h5m10s).",
@@ -58,7 +59,7 @@ export async function execute(interaction) {
         })
     }
 
-    const total = formatter(data)
+    const total = formatter(parsedTime)
     await interaction.reply({
         content: `A reminder has been set for you in ${total}.`,
         ephemeral: true,

@@ -90,7 +90,9 @@ export async function execute(interaction) {
                 unlink(rares, (err) => {
                     if (err) {
                         Logger.error(err)
-                    } else Logger.info(`${rares} was deleted`)
+                    } else {
+                        Logger.info(`${rares} was deleted`)
+                    }
                 })
                 Logger.info(`${rares} was deleted`)
 
@@ -98,7 +100,9 @@ export async function execute(interaction) {
                 unlink(raresPlus, (err) => {
                     if (err) {
                         Logger.error(err)
-                    } else Logger.info(`${raresPlus} was deleted`)
+                    } else {
+                        Logger.info(`${raresPlus} was deleted`)
+                    }
                 })
                 Logger.info(`${raresPlus} was deleted`)
             } catch (error) {
@@ -114,7 +118,7 @@ export async function execute(interaction) {
 async function fetchImage(url) {
     const response = await fetch(url)
     const arrayBuffer = await response.arrayBuffer()
-    return sharp(arrayBuffer) // Convert arrayBuffer to sharp
+    return sharp(arrayBuffer)
 }
 
 async function generateImage(pets, filename) {
@@ -123,7 +127,7 @@ async function generateImage(pets, filename) {
     const columnImages = []
     const BG_COLOUR = { r: 224, g: 246, b: 178, alpha: 1 }
 
-    for (let [petImagePath, adoptionDate, rarity] of pets) {
+    for (const [petImagePath, adoptionDate, rarity] of pets) {
         try {
             // Load pet image and get its metadata
             const petImageData = await fetchImage(petImagePath)
@@ -144,10 +148,10 @@ async function generateImage(pets, filename) {
             // Create text buffer for adoption date
             const adoptionDateBuffer = await sharp({
                 create: {
-                    width: petImageWidth, // match the pet image width
+                    width: petImageWidth,
                     height: 16,
                     channels: 4,
-                    background: BG_COLOUR, // RGBA for background color
+                    background: BG_COLOUR,
                 },
             })
                 .composite([
@@ -191,44 +195,46 @@ async function generateImage(pets, filename) {
             // Ensure rarity image matches the pet image width by adding transparent padding
             const paddedRarityImage = await sharp({
                 create: {
-                    width: petImageWidth, // Match the pet image width
-                    height: 30, // Fixed height for rarity image
+                    width: petImageWidth,
+                    height: 30,
                     channels: 4,
-                    background: BG_COLOUR, // RGBA for background color
+                    background: BG_COLOUR,
                 },
             })
                 .composite([
                     {
                         input: rarityImage,
+                        // Center the rarity image horizontally
                         left: Math.floor((petImageWidth - 111) / 2),
                         top: 0,
                     },
-                ]) // Center rarity image
+                ])
                 .png()
                 .toBuffer()
 
             // Stack the pet image, adoption date, and rarity image vertically
             const stackedImage = await sharp({
                 create: {
-                    width: petImageWidth, // Pet image width
-                    height: petImageHeight + 16 + 30, // Pet image height + adoption date + rarity image
+                    width: petImageWidth,
+                    // Pet image height + adoption date + rarity image
+                    height: petImageHeight + 16 + 30,
                     channels: 4,
-                    background: BG_COLOUR, // RGBA for background color
+                    background: BG_COLOUR,
                 },
             })
                 .composite([
-                    { input: petImage, top: 0, left: petImageWidthDiff }, // Pet image at the top
-                    { input: adoptionDateBuffer, top: petImageHeight, left: 0 }, // Adoption date below pet image
+                    { input: petImage, top: 0, left: petImageWidthDiff },
+                    { input: adoptionDateBuffer, top: petImageHeight, left: 0 },
                     {
                         input: paddedRarityImage,
                         top: petImageHeight + 16,
                         left: 0,
-                    }, // Rarity image below the adoption date
+                    },
                 ])
                 .png()
                 .toBuffer()
 
-            columnImages.push(stackedImage) // Push each stacked image to the column array
+            columnImages.push(stackedImage)
         } catch (error) {
             Logger.error(`Error processing entry: ${error.message}`)
         }
@@ -241,7 +247,7 @@ async function generateImage(pets, filename) {
 
     let totalWidth = 0
     let currentRowHeight = 0
-    let compositeImages = []
+    const compositeImages = []
     let rowImages = []
 
     // Loop through the images to create rows
@@ -295,7 +301,7 @@ async function generateImage(pets, filename) {
             width: finalWidth,
             height: finalHeight,
             channels: 4,
-            background: BG_COLOUR, // Match the background color used elsewhere
+            background: BG_COLOUR,
         },
     })
         .composite(compositeFinalImage)

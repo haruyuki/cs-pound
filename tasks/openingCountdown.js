@@ -29,19 +29,21 @@ export async function openingCountdown(client) {
 
         if (timeRemaining === 0) {
             Logger.debug(`The ${openingType} is currently open`)
-            timeoutTime = 60 // Reset after the event opens
+            // Reset timer to 60 minutes after the event opens
+            timeoutTime = 60
         } else if (timeRemaining <= 61) {
             Logger.debug(
                 "Opening time is less than 60 minutes, entering COOLDOWN",
             )
             lessThanOneHourRemaining = true
-            timeoutTime = 1 // Switch to 1-minute intervals
+            // Switch to 1-minute intervals
+            timeoutTime = 1
         } else if (timeRemaining >= 180) {
             Logger.debug("Opening time is greater than 3 hours")
-            timeoutTime = timeRemaining - 120 // Schedule the next call 3 hours before opening
+            timeoutTime = timeRemaining - 120
         } else {
             Logger.debug("Opening time is within 2 hours")
-            timeoutTime = timeRemaining - 59 // Schedule the next call closer to 1 hour
+            timeoutTime = timeRemaining - 59
         }
 
         Logger.debug(`Cooldown time set to ${timeoutTime} minutes`)
@@ -55,7 +57,8 @@ export async function openingCountdown(client) {
         if (timeRemaining === 0) {
             Logger.debug(`The ${openingType} is now open, disabling COOLDOWN`)
             lessThanOneHourRemaining = false
-            timeoutTime = 60 // Reset after the event opens
+            // Reset timer to 60 minutes after the event opens
+            timeoutTime = 60
             await updateAutoRemindTimes()
         } else {
             let CURRENT_REMIND_TIMES =
@@ -75,7 +78,9 @@ export async function openingCountdown(client) {
                     timeRemaining,
                     openingType,
                 )
-                let channelIDs = new Set(documents.map((doc) => doc.channel_id))
+                const channelIDs = new Set(
+                    documents.map((doc) => doc.channel_id),
+                )
 
                 // Send reminders for all channels
                 channelIDs.forEach((channelID) => {
@@ -103,12 +108,13 @@ export async function openingCountdown(client) {
                                 filteredDocuments,
                             )
                         }
-                    }, 5000) // 5s delay between each
+                    }, 5000)
+                    // 5s delay between each channel to prevent rate limiting
                 })
             }
 
-            timeoutTime = 1 // Keep checking every minute during the cooldown
-            timeRemaining-- // Adjust cached time for countdown
+            timeoutTime = 1
+            timeRemaining--
         }
     }
 
@@ -119,11 +125,11 @@ export async function openingCountdown(client) {
 // Helper function to send reminders
 async function sendReminderToChannel(
     channel,
-    timeRemaining,
+    minutesLeft,
     openingType,
     documents,
 ) {
-    const messagePrefix = `${timeRemaining} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `
+    const messagePrefix = `${minutesLeft} minute${minutesLeft > 1 ? "s" : ""} until the ${openingType} opens! `
     const filteredUsers = documents.map((doc) => `<@${doc.user_id}>`)
 
     const maxMessageLength = 2000
@@ -138,7 +144,7 @@ async function sendReminderToChannel(
             Logger.debug(
                 `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
             )
-            channel.send(currentMessage + usersBatch.join(" ")) // Sending the message
+            channel.send(currentMessage + usersBatch.join(" "))
 
             // Reset for the next message batch
             currentMessage = messagePrefix
@@ -148,7 +154,7 @@ async function sendReminderToChannel(
 
         // Add the current user to the message batch
         usersBatch.push(user)
-        currentMessageLength += user.length + 1 // +1 for the space
+        currentMessageLength += user.length + 1
     })
 
     // Send any remaining users in the last message
@@ -156,6 +162,6 @@ async function sendReminderToChannel(
         Logger.debug(
             `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
         )
-        channel.send(currentMessage + usersBatch.join(" ")) // Sending the final message batch
+        channel.send(currentMessage + usersBatch.join(" "))
     }
 }

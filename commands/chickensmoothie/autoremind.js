@@ -101,7 +101,7 @@ export async function execute(interaction) {
 
         if (remind_time === 0) {
             await interaction.reply(
-                `No reminder was found. Are you sure you have an Auto Remind set up?`,
+                "No reminder was found. Are you sure you have an Auto Remind set up?",
                 { ephemeral: true },
             )
             return

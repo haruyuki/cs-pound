@@ -32,14 +32,14 @@ const client = new MongoClient(process.env.MONGODB_URI)
 const database = client.db("cs_pound")
 const collection = database.collection("auto_remind")
 
-const jar = loadCookiesFromFile(COOKIE_FILE_PATH)
+const cookieJar = loadCookiesFromFile(COOKIE_FILE_PATH)
 const axiosClient = wrapper(
     axios.create({
-        jar: jar,
+        jar: cookieJar,
         withCredentials: true,
         headers: HEADERS,
     }),
-) // Axios instance with cookie jar
+)
 
 // Function to load cookies from a file
 function loadCookiesFromFile(filepath) {
@@ -160,12 +160,12 @@ const attemptLogin = async (captchaSolution = null) => {
 // Function to check for CAPTCHA and retry login if present
 export const login = async () => {
     try {
-        // Step 1: Attempt to login without CAPTCHA
-        let { success, html } = await attemptLogin()
+        // Step 1: Attempt to log in without CAPTCHA
+        const { success, html } = await attemptLogin()
 
         if (success) {
-            saveCookiesToFile(jar, COOKIE_FILE_PATH)
-            return // If login succeeds, exit early
+            saveCookiesToFile(cookieJar, COOKIE_FILE_PATH)
+            return
         }
 
         // Step 2: Use the HTML from the failed login to check for CAPTCHA
@@ -199,7 +199,7 @@ export const login = async () => {
 
         if (retryLoginResult.success) {
             Logger.success("Logged in successfully with CAPTCHA.")
-            saveCookiesToFile(jar, COOKIE_FILE_PATH)
+            saveCookiesToFile(cookieJar, COOKIE_FILE_PATH)
         } else {
             Logger.warn("Login failed even after solving reCAPTCHA.")
         }
@@ -259,7 +259,7 @@ export const getOpeningTime = async () => {
             return {
                 openingType: openingType.toLowerCase(),
                 timeRemaining: timeInMinutes,
-                thingsRemaining: 0, // No data for remaining things in this case
+                thingsRemaining: 0,
             }
         }
 
@@ -285,7 +285,7 @@ export function formatter([h, m, s]) {
     ].join("")
 }
 
-export const authenticate = function () {
+export const authenticate = () => {
     const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS)
     const auth = new google.auth.JWT(
         credentials.client_email,
@@ -296,7 +296,7 @@ export const authenticate = function () {
     return google.sheets({ version: "v4", auth })
 }
 
-export const getAutoRemindDocuments = async function (time, openingType) {
+export const getAutoRemindDocuments = async (time, openingType) => {
     if (openingType === "pound") {
         return await collection.find({ pound: time }).toArray()
     }
@@ -305,7 +305,7 @@ export const getAutoRemindDocuments = async function (time, openingType) {
     }
 }
 
-export const getRarePoundPets = async function () {
+export const getRarePoundPets = async () => {
     // Log in and check if successful
     await login()
 
@@ -331,7 +331,7 @@ export const getRarePoundPets = async function () {
                 const petImage = new URL(
                     $(petElement).find("dt a img").attr("src"),
                 )
-                petImage.searchParams.set("bg", "e0f6b2") // Add background parameter to the image URL
+                petImage.searchParams.set("bg", "e0f6b2")
 
                 // Push the pet details into the array
                 allPets.push([petImage.toString(), petAdoption, petRarity])
