@@ -79,17 +79,30 @@ export async function openingCountdown(client) {
 
                 // Send reminders for all channels
                 channelIDs.forEach((channelID) => {
-                    setTimeout(
-                        async () =>
+                    setTimeout(async () => {
+                        let channel = null
+                        try {
+                            channel = await client.channels.fetch(
+                                channelID.toString(),
+                            )
+                            Logger.debug(
+                                `Fetched channel ${channelID}: ${channel}`,
+                            )
+                        } catch (error) {
+                            Logger.error(
+                                `Failed to fetch channel ${channelID}: ${error.message}`,
+                            )
+                        }
+
+                        if (channel !== null) {
                             await sendReminderToChannel(
-                                client,
-                                channelID,
+                                channel,
                                 timeRemaining,
                                 openingType,
                                 documents,
-                            ),
-                        5000,
-                    ) // 5s delay between each
+                            )
+                        }
+                    }, 5000) // 5s delay between each
                 })
             }
 
@@ -104,14 +117,11 @@ export async function openingCountdown(client) {
 
 // Helper function to send reminders
 async function sendReminderToChannel(
-    client,
-    channelID,
+    channel,
     timeRemaining,
     openingType,
     documents,
 ) {
-    Logger.debug(`Attempting to send message to channel ${channelID}`)
-
     const messagePrefix = `${timeRemaining} minute${timeRemaining > 1 ? "s" : ""} until the ${openingType} opens! `
     const filteredUsers = documents.map((doc) => `<@${doc.user_id}>`)
 
@@ -120,46 +130,31 @@ async function sendReminderToChannel(
     let currentMessageLength = messagePrefix.length
     let usersBatch = []
 
-    // First, try to get the channel from the cache
-    let channel = null
-    try {
-        channel = await client.channels.fetch(channelID.toString())
-    } catch (error) {
-        Logger.error(
-            `Failed to fetch channel ${channelID}: ${error.message}`,
-        )
-        return // Exit the function if the channel couldn't be fetched
-    }
-
-    // If the channel is successfully retrieved, proceed with sending messages
-    if (channel) {
-        filteredUsers.forEach((user) => {
-            if (currentMessageLength + user.length + 1 > maxMessageLength) {
-                // Send the current message if adding the next user exceeds the limit
-                Logger.debug(
-                    `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
-                )
-                channel.send(currentMessage + usersBatch.join(" ")) // Sending the message
-
-                // Reset for the next message batch
-                currentMessage = messagePrefix
-                currentMessageLength = messagePrefix.length
-                usersBatch = []
-            }
-
-            // Add the current user to the message batch
-            usersBatch.push(user)
-            currentMessageLength += user.length + 1 // +1 for the space
-        })
-
-        // Send any remaining users in the last message
-        if (usersBatch.length > 0) {
+    // Proceed with sending messages
+    filteredUsers.forEach((user) => {
+        if (currentMessageLength + user.length + 1 > maxMessageLength) {
+            // Send the current message if adding the next user exceeds the limit
             Logger.debug(
                 `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
             )
-            channel.send(currentMessage + usersBatch.join(" ")) // Sending the final message batch
+            channel.send(currentMessage + usersBatch.join(" ")) // Sending the message
+
+            // Reset for the next message batch
+            currentMessage = messagePrefix
+            currentMessageLength = messagePrefix.length
+            usersBatch = []
         }
-    } else {
-        Logger.error(`Channel ${channelID} could not be found or fetched`)
+
+        // Add the current user to the message batch
+        usersBatch.push(user)
+        currentMessageLength += user.length + 1 // +1 for the space
+    })
+
+    // Send any remaining users in the last message
+    if (usersBatch.length > 0) {
+        Logger.debug(
+            `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
+        )
+        channel.send(currentMessage + usersBatch.join(" ")) // Sending the final message batch
     }
 }
