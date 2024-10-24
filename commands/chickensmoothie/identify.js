@@ -1,5 +1,4 @@
-import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
-import fetch from "node-fetch"
+import { SlashCommandBuilder } from "discord.js"
 
 import { ItemDB, PetDB } from "../../lib.js"
 
@@ -61,8 +60,8 @@ export async function execute(interaction) {
     }
 
     if (link.includes("item")) {
-        const { reply, attachment } = await identifyItem(link)
-        await interaction.reply({ content: reply, files: [attachment] })
+        const reply = await identifyItem(link)
+        await interaction.reply(reply)
         return
     }
 
@@ -73,8 +72,8 @@ export async function execute(interaction) {
         return
     }
 
-    const { reply, attachment } = await identifyPet(link)
-    await interaction.reply({ content: reply, files: [attachment] })
+    const reply = await identifyPet(link)
+    await interaction.reply(reply)
 }
 
 function replyWithDetails(name, event, year, link, isItem = true) {
@@ -84,78 +83,53 @@ function replyWithDetails(name, event, year, link, isItem = true) {
     const namePart = name ? `'${name}' ` : ""
     const eventPart = isMonth ? `${event} ${year}` : `${year} ${event}`
 
-    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link}`
+    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link} [⠀](${link})`
 }
-
-const createAttachment = async (link) => {
-    const response = await fetch(link)
-    const arrayBuffer = await response.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    return new AttachmentBuilder(buffer, { name: "image.png" })
-}
-
 async function identifyItem(link) {
     const matches = link.match(/item\/(\d+)(?:&p=(\d+))?\.jpg/)
     const itemLID = matches[1]
     const itemRID = matches[2] || null
-    const attachment = await createAttachment(link)
 
     const item = await ItemDB.findOne({
         where: itemRID == null ? { itemLID } : { itemLID, itemRID },
     })
 
     if (!item) {
-        const reply =
-            "There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet."
-        return {
-            reply,
-            attachment,
-        }
+        return `There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet. [⠀](${link})`
     }
 
-    const reply = replyWithDetails(
-        item.get("itemName"),
-        item.get("itemEvent"),
-        item.get("itemYear"),
-        item.get("itemLink"),
+    return (
+        replyWithDetails(
+            item.get("itemName"),
+            item.get("itemEvent"),
+            item.get("itemYear"),
+            item.get("itemLink"),
+        ) + ` [⠀](${link})`
     )
-
-    return { reply, attachment }
 }
 
 async function identifyPet(link) {
     const url = new URL(link)
     const params = new URLSearchParams(url.search)
     const petID = params.get("k")
-    const attachment = await createAttachment(link)
 
     if (EXCEPTIONS.includes(petID)) {
-        const reply =
-            "That pet is not identifiable at this growth stage :frowning:"
-        return {
-            reply,
-            attachment,
-        }
+        return `That pet is not identifiable at this growth stage :frowning: [⠀](${link})`
     }
 
     const pet = await PetDB.findOne({ where: { petID: petID } })
 
     if (!pet) {
-        const reply =
-            "There is no data for this pet yet :frowning:\nPlease note that current year pets don't have data yet."
-        return {
-            reply,
-            attachment,
-        }
+        return `There is no data for this pet yet :frowning:\nPlease note that current year pets don't have data yet. [⠀](${link})`
     }
 
-    const reply = replyWithDetails(
-        null,
-        pet.get("petEvent"),
-        pet.get("petYear"),
-        pet.get("petLink"),
-        false,
+    return (
+        replyWithDetails(
+            null,
+            pet.get("petEvent"),
+            pet.get("petYear"),
+            pet.get("petLink"),
+            false,
+        ) + ` [⠀](${link})`
     )
-
-    return { reply, attachment }
 }
