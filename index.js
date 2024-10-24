@@ -5,6 +5,7 @@ import { Client, Collection, GatewayIntentBits } from "discord.js"
 import dotenv from "dotenv"
 
 import { Logger } from "./logger.js"
+import { openingCountdown } from "./tasks/openingCountdown.js"
 
 dotenv.config()
 
@@ -66,6 +67,8 @@ async function init() {
     Logger.info("Loading events...")
     await loadEvents()
     await client.login(process.env.DISCORD_TOKEN)
+    Logger.info("Running openingCountdown background task...")
+    await openingCountdown(client)
 }
 
-init() // Start the async functions
+init()
