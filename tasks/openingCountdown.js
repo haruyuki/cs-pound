@@ -82,9 +82,7 @@ export async function openingCountdown(client) {
                     setTimeout(async () => {
                         let channel = null
                         try {
-                            channel = await client.channels.fetch(
-                                channelID.toString(),
-                            )
+                            channel = await client.channels.fetch(channelID)
                             Logger.debug(
                                 `Fetched channel ${channelID}: ${channel}`,
                             )
@@ -95,11 +93,14 @@ export async function openingCountdown(client) {
                         }
 
                         if (channel !== null) {
+                            const filteredDocuments = documents.filter(
+                                (doc) => doc.channel_id === channelID,
+                            )
                             await sendReminderToChannel(
                                 channel,
                                 timeRemaining,
                                 openingType,
-                                documents,
+                                filteredDocuments,
                             )
                         }
                     }, 5000) // 5s delay between each
