@@ -121,10 +121,17 @@ async function sendReminderToChannel(
     let usersBatch = []
 
     // First, try to get the channel from the cache
-    let channel = client.channels.cache.get(channelID)
+    let channel = null
+    try {
+        channel = client.channels.cache.get(channelID)
+    } catch (error) {
+        Logger.error(
+            `Failed to get channel ${channelID} from cache: ${error.message}`,
+        )
+    }
 
     // If the channel is not in cache, fetch it from the API
-    if (!channel) {
+    if (channel === null) {
         Logger.debug(
             `Channel ${channelID} not found in cache, fetching from API`,
         )
