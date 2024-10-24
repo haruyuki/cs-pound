@@ -70,7 +70,9 @@ export async function execute(interaction) {
         return
     }
 
-    const raresImage = new AttachmentBuilder(`./${rares}`, { name: "rares.png" })
+    const raresImage = new AttachmentBuilder(`./${rares}`, {
+        name: "rares.png",
+    })
     const raresPlusImage = new AttachmentBuilder(`./${raresPlus}`, {
         name: "raresPlus.png",
     })
