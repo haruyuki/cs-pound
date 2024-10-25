@@ -122,7 +122,7 @@ export async function openingCountdown(client) {
     }
 
     // Schedule the next run
-    setTimeout(openingCountdown, timeoutTime * 60000)
+    setTimeout(openingCountdown, timeoutTime * 60000, client)
 }
 
 // Helper function to send reminders
