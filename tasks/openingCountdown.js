@@ -85,9 +85,6 @@ export async function openingCountdown(client) {
                 // Send reminders for all channels
                 for (const channelID of channelIDs) {
                     setTimeout(async () => {
-                        if (!client) {
-                            Logger.error("Client is undefined!")
-                        }
                         let channel = null
                         try {
                             channel = await client.channels.fetch(channelID)
@@ -144,9 +141,6 @@ async function sendReminderToChannel(
     filteredUsers.forEach((user) => {
         if (currentMessageLength + user.length + 1 > maxMessageLength) {
             // Send the current message if adding the next user exceeds the limit
-            Logger.debug(
-                `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
-            )
             channel.send(currentMessage + usersBatch.join(" "))
 
             // Reset for the next message batch
