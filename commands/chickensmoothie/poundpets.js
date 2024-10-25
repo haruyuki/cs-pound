@@ -36,11 +36,11 @@ export async function execute(interaction) {
     imageGenerating = true
 
     const openingDetails = await getOpeningTime()
-    if (openingDetails.openingType === "The Lost and Found") {
+    if (openingDetails.openingType === "lost and found") {
         await interaction.reply("The next opening is not the Pound!")
         imageGenerating = false
         return
-    } else if (openingDetails.openingType === "The Pound") {
+    } else if (openingDetails.openingType === "pound") {
         await interaction.reply(
             "An image cannot be generated while the pound is still open!",
         )
