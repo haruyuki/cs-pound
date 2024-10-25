@@ -1,7 +1,7 @@
 import { readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
-import { Client, Collection, GatewayIntentBits } from "discord.js"
+import { ActivityType, Client, Collection, GatewayIntentBits } from "discord.js"
 import dotenv from "dotenv"
 
 import { Logger } from "./logger.js"
@@ -11,7 +11,7 @@ dotenv.config()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] })
+const client = new Client({ intents: [GatewayIntentBits.Guilds], presence: { activities: [{ name: "Need help? https://support.haruyuki.moe", type: ActivityType.Playing }] } })
 
 client.commands = new Collection()
 
