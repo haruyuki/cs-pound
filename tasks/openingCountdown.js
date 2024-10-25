@@ -83,8 +83,11 @@ export async function openingCountdown(client) {
                 )
 
                 // Send reminders for all channels
-                channelIDs.forEach((channelID) => {
+                for (const channelID of channelIDs) {
                     setTimeout(async () => {
+                        if (!client) {
+                            Logger.error("Client is undefined!")
+                        }
                         let channel = null
                         try {
                             channel = await client.channels.fetch(channelID)
@@ -110,7 +113,7 @@ export async function openingCountdown(client) {
                         }
                     }, 5000)
                     // 5s delay between each channel to prevent rate limiting
-                })
+                }
             }
 
             timeoutTime = 1

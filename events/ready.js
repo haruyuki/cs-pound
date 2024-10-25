@@ -34,5 +34,8 @@ export async function execute(client) {
     Logger.info("Setting auto remind times...")
     await updateAutoRemindTimes()
 
+    Logger.info("Running openingCountdown background task...")
+    await openingCountdown(client)
+
     Logger.info(`Ready! Logged in as ${client.user.tag}`)
 }

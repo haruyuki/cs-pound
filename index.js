@@ -5,7 +5,6 @@ import { Client, Collection, GatewayIntentBits } from "discord.js"
 import dotenv from "dotenv"
 
 import { Logger } from "./logger.js"
-import { openingCountdown } from "./tasks/openingCountdown.js"
 
 dotenv.config()
 
@@ -28,7 +27,7 @@ async function loadCommands() {
         )
         for (const file of commandFiles) {
             const filePath = pathToFileURL(join(commandsPath, file))
-            const command = await import(filePath) // Dynamic import inside async function
+            const command = await import(filePath)
             if ("data" in command && "execute" in command) {
                 client.commands.set(command.data.name, command)
                 Logger.success(`Loaded command: ${command.data.name}`)
@@ -50,7 +49,7 @@ async function loadEvents() {
 
     for (const file of eventFiles) {
         const filePath = pathToFileURL(join(eventsPath, file))
-        const event = await import(filePath) // Dynamic import inside async function
+        const event = await import(filePath)
         if (event.once) {
             client.once(event.name, (...args) => event.execute(...args))
         } else {
@@ -67,8 +66,6 @@ async function init() {
     Logger.info("Loading events...")
     await loadEvents()
     await client.login(process.env.DISCORD_TOKEN)
-    Logger.info("Running openingCountdown background task...")
-    await openingCountdown(client)
 }
 
 init()
