@@ -66,7 +66,7 @@ export async function execute(interaction) {
     })
 
     setTimeout(() => {
-        interaction.followUp({
+        interaction.channel.send({
             content: `${interaction.user}, this is your ${amount} reminder!`,
         })
     }, milliseconds)
