@@ -129,6 +129,7 @@ async function sendReminderToChannel(
     openingType,
     documents,
 ) {
+    minutesLeft++
     const messagePrefix = `${minutesLeft} minute${minutesLeft > 1 ? "s" : ""} until the ${openingType} opens! `
     const filteredUsers = documents.map((doc) => `<@${doc.user_id}>`)
 
