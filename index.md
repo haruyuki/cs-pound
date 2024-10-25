@@ -11,7 +11,7 @@ pagination:
   <p>CS-Pound is a Discord bot for the virtual pet adoption website Chicken Smoothie. It provides features such as identifying pets and items as well as knowing pound opening times straight from Discord.</p>
   <p>Click the invite link below to get started!</p>
   <div class="centered">
-    <a class="btn btn-primary btn-lg get-started-btn" href="https://discord.com/oauth2/authorize?client_id=407151634544590849&scope=bot&permissions=268946496"><i class="fab fa-discord"></i>&nbsp;&nbsp;Invite to Discord</a>
+    <a class="btn btn-primary btn-lg get-started-btn" href="https://discord.com/oauth2/authorize?client_id=407151634544590849"><i class="fab fa-discord"></i>&nbsp;&nbsp;Invite to Discord</a>
   </div>
 </div>
 
