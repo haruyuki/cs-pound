@@ -13,7 +13,7 @@ import { Logger } from "./logger.js"
 
 dotenv.config()
 
-export const BOT_VERSION = "2024.10.20"
+export const BOT_VERSION = "2024.10.26"
 const COOKIE_FILE_PATH = "./cookies.json"
 const CS_USERNAME = process.env.CS_USERNAME
 const CS_PASSWORD = process.env.CS_PASSWORD

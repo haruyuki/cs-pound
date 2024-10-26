@@ -4,6 +4,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js"
 import ms from "ms"
+import { BOT_VERSION } from "../../lib.js"
 
 export const data = new SlashCommandBuilder()
     .setName("stats")
@@ -28,7 +29,8 @@ export async function execute(interaction) {
                 value: `${discordJsVersion}`,
                 inline: true,
             },
-            { name: "Bot Uptime", value: `${uptime}`, inline: true },
+            { name: "Bot Version", value: `v${BOT_VERSION}`, inline: true },
+            { name: "Uptime", value: `${uptime}`, inline: true },
         )
 
     await interaction.reply({ embeds: [statsEmbed] })
