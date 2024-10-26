@@ -13,12 +13,8 @@ let openingType = null
 let timeRemaining = 0
 
 export async function openingCountdown(client) {
-    Logger.info("Running opening countdown background task")
-
     // Fetch getOpeningTime until the cooldown starts (within 1 hour)
     if (!lessThanOneHourRemaining) {
-        Logger.debug("Task not on cooldown")
-
         const openingTime = await getOpeningTime()
         Logger.debug("Retrieved opening time")
 
@@ -157,9 +153,6 @@ async function sendReminderToChannel(
 
     // Send any remaining users in the last message
     if (usersBatch.length > 0) {
-        Logger.debug(
-            `Message to send: ${currentMessage} ${usersBatch.join(" ")}`,
-        )
         channel.send(currentMessage + usersBatch.join(" "))
     }
 }
