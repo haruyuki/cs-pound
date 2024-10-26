@@ -4,6 +4,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js"
 import ms from "ms"
+
 import { BOT_VERSION } from "../../lib.js"
 
 export const data = new SlashCommandBuilder()

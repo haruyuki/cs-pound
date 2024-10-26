@@ -40,7 +40,10 @@ export async function execute(interaction) {
         await interaction.reply("The next opening is not the Pound!")
         imageGenerating = false
         return
-    } else if (openingDetails.openingType === "pound" && openingDetails.timeRemaining === 0) {
+    } else if (
+        openingDetails.openingType === "pound" &&
+        openingDetails.timeRemaining === 0
+    ) {
         await interaction.reply(
             "An image cannot be generated while the pound is still open!",
         )

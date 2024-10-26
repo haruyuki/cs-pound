@@ -11,7 +11,17 @@ dotenv.config()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds], presence: { activities: [{ name: "Need help? https://support.haruyuki.moe", type: ActivityType.Playing }] } })
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds],
+    presence: {
+        activities: [
+            {
+                name: "Need help? https://support.haruyuki.moe",
+                type: ActivityType.Playing,
+            },
+        ],
+    },
+})
 
 client.commands = new Collection()
 
