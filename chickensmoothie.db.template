@@ -1,5 +1,3 @@
-This database is a SQLite database that contains the following tables:
-
 CREATE TABLE "ChickenSmoothieItemArchive" (
 	"itemLID"	INTEGER UNIQUE,
 	"itemRID"	INTEGER UNIQUE,
