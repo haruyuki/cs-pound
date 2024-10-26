@@ -29,4 +29,4 @@ I would prefer if you don't your run own instance of my bot, but rather use the 
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](COPYING) file for details.
 
-Pet rarity image atlas is copyright and property of [Chicken Smoothie](https://www.chickensmoothie.com). A local copy of the atlas is included in the repository to reduce traffic to Chicken Smoothie servers.
+Pet rarity image atlas and pet images in generated images are copyright and property of [Chicken Smoothie](https://www.chickensmoothie.com). A local copy of the atlas is included in the repository to reduce traffic to Chicken Smoothie servers.
