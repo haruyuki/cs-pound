@@ -84,9 +84,6 @@ export async function openingCountdown(client) {
                         let channel = null
                         try {
                             channel = await client.channels.fetch(channelID)
-                            Logger.debug(
-                                `Fetched channel ${channelID}: ${channel}`,
-                            )
                         } catch (error) {
                             Logger.error(
                                 `Failed to fetch channel ${channelID}: ${error.message}`,
