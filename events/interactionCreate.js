@@ -26,10 +26,14 @@ export async function execute(interaction) {
                 ephemeral: true,
             })
         } else {
-            await interaction.reply({
-                content: "There was an error while executing this command!",
-                ephemeral: true,
-            })
+            try {
+                await interaction.reply({
+                    content: "There was an error while executing this command!",
+                    ephemeral: true,
+                })
+            } catch (error2) {
+                Logger.error(error2)
+            }
         }
     }
 }
