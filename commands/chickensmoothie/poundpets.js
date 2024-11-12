@@ -84,7 +84,7 @@ export async function execute(interaction) {
     interaction.editReply({ files: [raresPlusImage, raresImage] })
 
     Logger.debug(
-        `Deleting image after: ${openingDetails.timeRemaining + 90} minutes`,
+        `Deleting image after: ${openingDetails.timeRemaining + 10} minutes`,
     )
     setTimeout(
         async () => {
@@ -114,7 +114,7 @@ export async function execute(interaction) {
             imageGenerated = false
             imageGenerating = false
         },
-        (openingDetails.timeRemaining + 90) * 60000,
+        (openingDetails.timeRemaining + 10) * 60000,
     )
 }
 
