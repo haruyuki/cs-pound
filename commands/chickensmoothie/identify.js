@@ -104,7 +104,7 @@ async function identifyItem(link) {
             item.get("itemEvent"),
             item.get("itemYear"),
             item.get("itemLink"),
-        ) + ` [⠀](${link})`
+        )
     )
 }
 
