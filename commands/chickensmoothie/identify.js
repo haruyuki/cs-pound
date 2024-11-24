@@ -98,13 +98,11 @@ async function identifyItem(link) {
         return `There is no data for this item yet :frowning:\nPlease note that current year items don't have data yet. [⠀](${link})`
     }
 
-    return (
-        replyWithDetails(
-            item.get("itemName"),
-            item.get("itemEvent"),
-            item.get("itemYear"),
-            item.get("itemLink"),
-        )
+    return replyWithDetails(
+        item.get("itemName"),
+        item.get("itemEvent"),
+        item.get("itemYear"),
+        item.get("itemLink"),
     )
 }
 
