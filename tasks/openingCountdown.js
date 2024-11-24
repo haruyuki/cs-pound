@@ -34,6 +34,9 @@ export async function openingCountdown(client) {
             lessThanOneHourRemaining = true
             // Switch to 1-minute intervals
             timeoutTime = 1
+        } else if (timeRemaining === 600) {
+            Logger.debug("Opening time is 10 hours away")
+            timeoutTime = 60
         } else if (timeRemaining >= 180) {
             Logger.debug("Opening time is greater than 3 hours")
             timeoutTime = timeRemaining - 120
