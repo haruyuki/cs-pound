@@ -132,7 +132,7 @@ export async function execute(interaction) {
     const year = interaction.options.getNumber("year")
     const type = interaction.options.getString("type")
 
-    await interaction.reply(`Updating database for ${type} from year ${year}`)
+    await interaction.reply(`## Updating ${type} database for year ${year}`)
 
     try {
         const eventLinks = await fetchEventLinks(year, type)
@@ -148,9 +148,6 @@ export async function execute(interaction) {
 
             const pages =
                 $("div.pages").length === 0 ? 1 : $("div.pages a").length
-            await interaction.channel.send(
-                `Adding ${pages} page(s) of ${type} from [${eventTitle}](${baseLink})`,
-            )
 
             for (let page = 0; page < pages; page++) {
                 const pageMultiplier = type === "pets" ? 7 : 10
@@ -160,10 +157,14 @@ export async function execute(interaction) {
                         : `${baseLink}?pageStart=${page * pageMultiplier}`
                 await processPage(pageLink, type, year, eventTitle)
             }
+
+            await interaction.channel.send(
+                `Added ${pages} page${pages > 1 ? "s" : ""} from [${eventTitle}](${baseLink})`,
+            )
             await delay(10000)
         }
         await interaction.channel.send(
-            `Database updated for ${type} of year ${year}.`,
+            `*Update complete for ${type} of year ${year}.*`,
         )
     } catch (err) {
         Logger.error(err)
