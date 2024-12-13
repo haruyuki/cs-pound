@@ -48,7 +48,7 @@ async function processPage(pageLink, type, year, eventTitle) {
         return Promise.all(
             petIds.map(async (petId) => {
                 try {
-                    await PetDB.create({
+                    await PetDB.upsert({
                         petID: petId,
                         petYear: year,
                         petEvent: eventTitle,
@@ -82,7 +82,7 @@ async function processPage(pageLink, type, year, eventTitle) {
         return Promise.all(
             items.map(async ({ name, left, right }) => {
                 try {
-                    await ItemDB.create({
+                    await ItemDB.upsert({
                         itemLID: left,
                         itemRID: right,
                         itemName: name,
