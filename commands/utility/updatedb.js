@@ -160,7 +160,7 @@ export async function execute(interaction) {
                         : `${baseLink}?pageStart=${page * pageMultiplier}`
                 await processPage(pageLink, type, year, eventTitle)
             }
-            await delay(1500)
+            await delay(10000)
         }
         await interaction.channel.send(
             `Database updated for ${type} of year ${year}.`,
