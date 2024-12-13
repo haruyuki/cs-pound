@@ -1,15 +1,12 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { writeFileSync } from "node:fs"
 import { Solver } from "@2captcha/captcha-solver"
-import axios from "axios"
-import { wrapper } from "axios-cookiejar-support"
-import * as cheerio from "cheerio"
 import dotenv from "dotenv"
 import { google } from "googleapis"
 import { MongoClient } from "mongodb"
 import Sequelize, { NUMBER, STRING } from "sequelize"
-import { CookieJar } from "tough-cookie"
 
 import { Logger } from "./logger.js"
+import { cookieJar, makeGETRequest, makePOSTRequest } from "./webrequests.js"
 
 dotenv.config()
 
@@ -17,10 +14,6 @@ export const BOT_VERSION = "2024.10.26"
 const COOKIE_FILE_PATH = "./cookies.json"
 const CS_USERNAME = process.env.CS_USERNAME
 const CS_PASSWORD = process.env.CS_PASSWORD
-export const HEADERS = {
-    "User-Agent": "CS Pound Discord Bot Agent " + BOT_VERSION,
-    From: "haru@haruyuki.moe",
-}
 export let POUND_REMIND_TIMES = []
 export let LAF_REMIND_TIMES = []
 const POUND_URL =
@@ -31,26 +24,6 @@ const solver = new Solver(process.env.CAPTCHA_API_KEY)
 const client = new MongoClient(process.env.MONGODB_URI)
 const database = client.db("cs_pound")
 const collection = database.collection("auto_remind")
-
-const cookieJar = loadCookiesFromFile(COOKIE_FILE_PATH)
-const axiosClient = wrapper(
-    axios.create({
-        jar: cookieJar,
-        withCredentials: true,
-        headers: HEADERS,
-    }),
-)
-
-// Function to load cookies from a file
-function loadCookiesFromFile(filepath) {
-    Logger.debug("Loading cookies from file...")
-    if (existsSync(filepath)) {
-        const serializedCookies = readFileSync(filepath, "utf-8")
-        return CookieJar.deserializeSync(JSON.parse(serializedCookies))
-    }
-    Logger.warn("No cookies found in file, creating a new cookie jar.")
-    return new CookieJar()
-}
 
 // Function to save the cookies to a file
 function saveCookiesToFile(jar, filepath) {
@@ -107,10 +80,9 @@ export const ItemDB = sequelize.define(
 // Function to attempt login without CAPTCHA
 const attemptLogin = async (captchaSolution = null) => {
     try {
-        const loginPageUrl =
-            "https://www.chickensmoothie.com/Forum/ucp.php?mode=login"
-        const loginPageResponse = await axiosClient.get(loginPageUrl)
-        const $ = cheerio.load(loginPageResponse.data)
+        const $ = await makeGETRequest(
+            "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
+        )
 
         const csrfToken = $('input[name="csrf_token"]').val()
         const payload = new URLSearchParams()
@@ -127,29 +99,19 @@ const attemptLogin = async (captchaSolution = null) => {
             payload.append("g-recaptcha-response", captchaSolution)
         }
 
-        const loginUrl =
-            "https://www.chickensmoothie.com/Forum/ucp.php?mode=login"
-        const loginResponse = await axiosClient.post(
-            loginUrl,
+        const postLoginContent = await makePOSTRequest(
+            "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
             payload.toString(),
-            {
-                headers: {
-                    ...HEADERS,
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                withCredentials: true,
-            },
+            true,
         )
-
-        const postLoginContent = cheerio.load(loginResponse.data)
         const postLogoutText = postLoginContent("li.icon-logout a").text()
 
         if (postLogoutText.includes("Logout")) {
             Logger.success("Logged in successfully!")
-            return { success: true, html: loginResponse.data }
+            return { success: true, html: postLoginContent }
         } else {
             Logger.warn("Login failed, CAPTCHA may be required.")
-            return { success: false, html: loginResponse.data }
+            return { success: false, html: postLoginContent }
         }
     } catch (error) {
         Logger.error("Error during login:" + error)
@@ -161,7 +123,7 @@ const attemptLogin = async (captchaSolution = null) => {
 export const login = async () => {
     try {
         // Step 1: Attempt to log in without CAPTCHA
-        const { success, html } = await attemptLogin()
+        const { success, $ } = await attemptLogin()
 
         if (success) {
             saveCookiesToFile(cookieJar, COOKIE_FILE_PATH)
@@ -170,9 +132,6 @@ export const login = async () => {
 
         // Step 2: Use the HTML from the failed login to check for CAPTCHA
         Logger.debug("Attempting login again with reCAPTCHA...")
-
-        // Use the response HTML from the failed login to check for reCAPTCHA
-        const $ = cheerio.load(html)
 
         // Check for reCAPTCHA site key
         const siteKey = $("div.g-recaptcha").attr("data-sitekey")
@@ -216,12 +175,9 @@ export const updateAutoRemindTimes = async () => {
 export const getOpeningTime = async () => {
     try {
         // Make the request to the URL using axiosClient and the existing cookie jar
-        const response = await axiosClient.get(
+        const $ = await makeGETRequest(
             "https://www.chickensmoothie.com/poundandlostandfound.php",
         )
-
-        // Load the HTML response into Cheerio
-        const $ = cheerio.load(response.data)
 
         // Extract the last <h2> element's text content
         const text = $("h2:last-of-type").text().trim()
@@ -311,10 +267,7 @@ export const getRarePoundPets = async () => {
 
     try {
         // Fetch the pound page HTML using axiosClient
-        const { data: pageHtml } = await axiosClient.get(POUND_URL)
-
-        // Load the HTML into cheerio for parsing
-        const $ = cheerio.load(pageHtml)
+        const $ = await makeGETRequest(POUND_URL)
         const allPets = []
 
         // Loop through all pets and extract rare pets
