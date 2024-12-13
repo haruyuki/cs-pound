@@ -206,7 +206,7 @@ export const getOpeningTime = async () => {
         )
 
         if (match) {
-            const [_, openingType, hours, minutes] = match
+            const [, openingType, hours, minutes] = match
 
             // Convert to minutes, defaulting undefined values to 0
             const timeInMinutes =
