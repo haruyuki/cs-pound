@@ -103,6 +103,7 @@ const attemptLogin = async (captchaSolution = null) => {
             "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
             payload.toString(),
             true,
+            false,
         )
         const postLogoutText = postLoginContent("li.icon-logout a").text()
 

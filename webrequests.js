@@ -47,16 +47,37 @@ export async function makeGETRequest(url) {
     }
 }
 
-export async function makePOSTRequest(url, data, includeCredentials = false) {
+export async function makePOSTRequest(
+    url,
+    data,
+    includeCredentials = false,
+    stateless = false,
+) {
     try {
-        const response = await axiosClient.post(url, data, {
+        const client = stateless
+            ? axios.create({
+                  withCredentials: false,
+                  headers: {
+                      ...HEADERS,
+                      "Content-Type": "application/x-www-form-urlencoded",
+                  },
+              })
+            : axiosClient
+
+        const response = await client.post(url, data, {
             headers: {
                 ...HEADERS,
                 "Content-Type": "application/x-www-form-urlencoded",
             },
-            withCredentials: includeCredentials,
+            withCredentials: includeCredentials && !stateless,
         })
-        return cheerio.load(response.data)
+
+        const contentType = response.headers["content-type"]
+        if (contentType.includes("application/json")) {
+            return response.data
+        } else {
+            return cheerio.load(response.data)
+        }
     } catch (error) {
         Logger.error(error)
     }
