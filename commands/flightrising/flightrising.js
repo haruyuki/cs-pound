@@ -1,7 +1,21 @@
 import { SlashCommandBuilder } from "discord.js"
 
-import { authenticate } from "../../lib.js"
-import { Logger } from "../../logger.js"
+import { csCommand, gemsCommand, treasureCommand } from "./conversion.js"
+import { progenyCommand } from "./progeny.js"
+
+export const ELEMENTS = {
+    earth: 1,
+    plague: 2,
+    wind: 3,
+    water: 4,
+    lightning: 5,
+    ice: 6,
+    shadow: 7,
+    light: 8,
+    arcane: 9,
+    nature: 10,
+    fire: 11,
+}
 
 export const data = new SlashCommandBuilder()
     .setName("flightrising")
@@ -39,6 +53,35 @@ export const data = new SlashCommandBuilder()
                     .setRequired(true),
             ),
     )
+    .addSubcommand((subcommand) =>
+        subcommand
+            .setName("progeny")
+            .setDescription("See the offspring of two dragon IDs.")
+            .addNumberOption((option) =>
+                option
+                    .setName("dragon1")
+                    .setDescription("The ID of the first dragon.")
+                    .setRequired(true),
+            )
+            .addNumberOption((option) =>
+                option
+                    .setName("dragon2")
+                    .setDescription("The ID of the second dragon.")
+                    .setRequired(true),
+            )
+            .addNumberOption((option) =>
+                option
+                    .setName("element")
+                    .setDescription("The element of the offspring.")
+                    .setRequired(false)
+                    .addChoices(
+                        Object.entries(ELEMENTS).map(([name, value]) => ({
+                            name,
+                            value,
+                        })),
+                    ),
+            ),
+    )
 
 export async function execute(interaction) {
     const subcommand = interaction.options.getSubcommand()
@@ -54,5 +97,13 @@ export async function execute(interaction) {
 
     if (subcommand === "cs") {
         await csCommand(interaction, amount)
+    }
+
+    if (subcommand === "progeny") {
+        const dragon1 = interaction.options.getNumber("dragon1")
+        const dragon2 = interaction.options.getNumber("dragon2")
+        const element = interaction.options.getNumber("element")
+
+        await progenyCommand(interaction, dragon1, dragon2, element)
     }
 }
