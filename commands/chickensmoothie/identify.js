@@ -83,7 +83,7 @@ function replyWithDetails(name, event, year, link, isItem = true) {
     const namePart = name ? `'${name}' ` : ""
     const eventPart = isMonth ? `${event} ${year}` : `${year} ${event}`
 
-    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link} [⠀](${link})`
+    return `That ${entityType} is ${namePart}from ${eventPart}!\nArchive Link: ${link}`
 }
 async function identifyItem(link) {
     const matches = link.match(/item\/(\d+)(?:&p=(\d+))?\.jpg/)
@@ -103,7 +103,7 @@ async function identifyItem(link) {
         item.get("itemEvent"),
         item.get("itemYear"),
         item.get("itemLink"),
-    )
+    ) + ` [⠀](${link})`
 }
 
 async function identifyPet(link) {
