@@ -6,7 +6,6 @@ import sharp from "sharp"
 import { getOpeningTime, getRarePoundPets } from "../../lib.js"
 import { Logger } from "../../logger.js"
 
-let imageGenerated = existsSync("rares.png") && existsSync("raresPlus.png")
 let imageGenerating = false
 
 export const data = new SlashCommandBuilder()
@@ -14,7 +13,7 @@ export const data = new SlashCommandBuilder()
     .setDescription("Get the list of pets in the pound.")
 
 export async function execute(interaction) {
-    if (imageGenerated) {
+    if (existsSync("rares.png") && existsSync("raresPlus.png") && !imageGenerating) {
         await interaction.deferReply()
         await interaction.editReply({
             files: [
@@ -79,7 +78,6 @@ export async function execute(interaction) {
     const raresPlusImage = new AttachmentBuilder(`./${raresPlus}`, {
         name: "raresPlus.png",
     })
-    imageGenerated = true
 
     interaction.editReply({ files: [raresPlusImage, raresImage] })
 
@@ -111,7 +109,6 @@ export async function execute(interaction) {
             } catch (error) {
                 Logger.error("Error deleting files:", error)
             }
-            imageGenerated = false
             imageGenerating = false
         },
         (openingDetails.timeRemaining + 10) * 60000,
