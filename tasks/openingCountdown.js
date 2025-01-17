@@ -16,7 +16,6 @@ export async function openingCountdown(client) {
     // Fetch getOpeningTime until the cooldown starts (within 1 hour)
     if (!lessThanOneHourRemaining) {
         const openingTime = await getOpeningTime()
-        Logger.debug("Retrieved opening time")
 
         if (openingTime != null) {
             openingType = openingTime.openingType
@@ -24,37 +23,24 @@ export async function openingCountdown(client) {
         }
 
         if (timeRemaining === 0) {
-            Logger.debug(`The ${openingType} is currently open`)
             // Reset timer to 60 minutes after the event opens
             timeoutTime = 60
         } else if (timeRemaining <= 61) {
-            Logger.debug(
-                "Opening time is less than 60 minutes, entering COOLDOWN",
-            )
             lessThanOneHourRemaining = true
             // Switch to 1-minute intervals
             timeoutTime = 1
         } else if (timeRemaining === 600) {
-            Logger.debug("Opening time is 10 hours away")
             timeoutTime = 60
         } else if (timeRemaining >= 180) {
-            Logger.debug("Opening time is greater than 3 hours")
             timeoutTime = timeRemaining - 120
         } else {
-            Logger.debug("Opening time is within 2 hours")
             timeoutTime = timeRemaining - 59
         }
-
-        Logger.debug(`Cooldown time set to ${timeoutTime} minutes`)
     }
 
     // If within 1 hour, enter the cooldown loop
     if (lessThanOneHourRemaining) {
-        Logger.debug(
-            `Less than 1 hour remaining (${timeRemaining}), checking for reminders`,
-        )
         if (timeRemaining === 0) {
-            Logger.debug(`The ${openingType} is now open, disabling COOLDOWN`)
             lessThanOneHourRemaining = false
             // Reset timer to 60 minutes after the event opens
             timeoutTime = 60
@@ -68,10 +54,6 @@ export async function openingCountdown(client) {
 
             // Only fetch reminders when timeRemaining matches a reminder time
             if (CURRENT_REMIND_TIMES.includes(timeRemaining)) {
-                Logger.debug(
-                    `Sending reminder at ${timeRemaining} minutes for ${openingType}`,
-                )
-
                 // Fetch only if timeRemaining matches reminder times
                 const documents = await getAutoRemindDocuments(
                     timeRemaining,
