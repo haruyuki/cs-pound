@@ -1,39 +1,56 @@
-import { Events } from "discord.js"
+import { Events, MessageFlags } from "discord.js"
 
 import { Logger } from "../logger.js"
 
 export const name = Events.InteractionCreate
 
 export async function execute(interaction) {
-    if (!interaction.isChatInputCommand()) return
-
-    const command = interaction.client.commands.get(interaction.commandName)
-
-    if (!command) {
-        Logger.error(
-            `No command matching ${interaction.commandName} was found.`,
-        )
-        return
-    }
-
     try {
+        if (!interaction.isChatInputCommand()) return
+
+        const command = interaction.client.commands.get(interaction.commandName)
+
+        if (!command) {
+            Logger.error(
+                `Command not found: ${interaction.commandName} | User: ${interaction.user.tag} | Channel: ${interaction.channel?.id || "N/A"} | Guild: ${interaction.guild?.id || "N/A"}`,
+            )
+            return
+        }
+
         await command.execute(interaction)
     } catch (error) {
-        Logger.error(error)
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
-                content: "There was an error while executing this command!",
-                ephemeral: true,
-            })
-        } else {
-            try {
+        const errorDetails = [
+            `Command: ${interaction.commandName || "N/A"}`,
+            `User: ${interaction.user?.tag || "N/A"}`,
+            `Channel: ${interaction.channel?.id || "N/A"}`,
+            `Guild: ${interaction.guild?.id || "N/A"}`,
+            `Error: ${error.message}`,
+            `Code: ${error.code || "N/A"}`,
+            `Stack: ${error.stack || "No stack trace"}`,
+        ].join(" | ")
+
+        Logger.error(`Interaction Error: ${errorDetails}`)
+
+        try {
+            if (
+                interaction.isCommand() &&
+                !interaction.replied &&
+                !interaction.deferred
+            ) {
                 await interaction.reply({
-                    content: "There was an error while executing this command!",
-                    ephemeral: true,
+                    content: "An error occurred while executing this command!",
+                    flags: MessageFlags.Ephemeral,
                 })
-            } catch (error2) {
-                Logger.error(error2)
+            } else if (interaction.isRepliable()) {
+                await interaction.followUp({
+                    content: "An error occurred after initial response!",
+                    flags: MessageFlags.Ephemeral,
+                })
             }
+        } catch (replyError) {
+            Logger.error(
+                `Reply Failed: ${replyError.message} | Command: ${interaction.commandName} | Interaction ID: ${interaction.id}`,
+            )
         }
     }
 }
