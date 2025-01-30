@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js"
+import { MessageFlags, SlashCommandBuilder } from "discord.js"
 import { MongoClient } from "mongodb"
 
 const client = new MongoClient(process.env.MONGODB_URI)
@@ -100,10 +100,11 @@ export async function execute(interaction) {
         const remind_time = result[reminderType]
 
         if (remind_time === 0) {
-            await interaction.reply(
-                "No reminder was found. Are you sure you have an Auto Remind set up?",
-                { ephemeral: true },
-            )
+            await interaction.reply({
+                content:
+                    "No reminder was found. Are you sure you have an Auto Remind set up?",
+                flags: MessageFlags.Ephemeral,
+            })
             return
         }
 

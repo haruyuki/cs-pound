@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js"
+import { MessageFlags, SlashCommandBuilder } from "discord.js"
 
 import { formatter } from "../../lib.js"
 
@@ -55,14 +55,14 @@ export async function execute(interaction) {
         return await interaction.reply({
             content:
                 "Invalid time format. Please provide a valid time format (e.g., 10s, 5m, 1h, 1h5m10s).",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         })
     }
 
     const total = formatter(parsedTime)
     await interaction.reply({
         content: `A reminder has been set for you in ${total}.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
     })
 
     setTimeout(() => {

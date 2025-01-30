@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js"
+import { MessageFlags, SlashCommandBuilder } from "discord.js"
 
 export const data = new SlashCommandBuilder()
     .setName("support")
@@ -8,6 +8,6 @@ export async function execute(interaction) {
     await interaction.reply({
         content:
             "Need help with the bot? Come join the support server here! https://support.haruyuki.moe/",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
     })
 }
