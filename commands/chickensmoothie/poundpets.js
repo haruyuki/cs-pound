@@ -6,15 +6,12 @@ import sharp from "sharp"
 import { getOpeningTime, getRarePoundPets } from "../../lib.js"
 import { Logger } from "../../logger.js"
 
-// Startup cleanup
-;["rares.png", "raresPlus.png"].forEach((file) => {
-    if (existsSync(file)) {
-        unlink(file, (err) => {
-            if (err) Logger.error(`Startup cleanup failed for ${file}:`, err)
-            else Logger.info(`Cleaned up old ${file}`)
-        })
-    }
-})
+if (existsSync("rares.png")) {
+    unlink("rares.png", (err) => {
+        if (err) Logger.error("Startup cleanup failed for rares.png:", err)
+        else Logger.info("Cleaned up old rares.png")
+    })
+}
 
 let imageGenerated = false
 let imageGenerating = false
@@ -28,9 +25,6 @@ export async function execute(interaction) {
         await interaction.deferReply()
         await interaction.editReply({
             files: [
-                new AttachmentBuilder("./raresPlus.png", {
-                    name: "raresPlus.png",
-                }),
                 new AttachmentBuilder("./rares.png", { name: "rares.png" }),
             ],
         })
@@ -67,18 +61,9 @@ export async function execute(interaction) {
         Logger.debug("Fetching rare pets from the pound")
         const rarePets = await getRarePoundPets()
 
-        const [rares, raresPlus] = await Promise.all([
-            generateImage(
-                rarePets.filter((pet) => pet[2] === "Rare"),
-                "rares.png",
-            ),
-            generateImage(
-                rarePets.filter((pet) => pet[2] !== "Rare"),
-                "raresPlus.png",
-            ),
-        ])
+        const rares = await generateImage(rarePets, "rares.png")
 
-        if (!rares || !raresPlus) {
+        if (!rares) {
             await interaction.editReply(
                 "Error generating images. Please contact the developer.",
             )
@@ -88,9 +73,6 @@ export async function execute(interaction) {
         imageGenerated = true
         await interaction.editReply({
             files: [
-                new AttachmentBuilder("./raresPlus.png", {
-                    name: "raresPlus.png",
-                }),
                 new AttachmentBuilder("./rares.png", { name: "rares.png" }),
             ],
         })
@@ -99,7 +81,7 @@ export async function execute(interaction) {
         const deletionTime = (openingDetails.timeRemaining + 10) * 60000
         Logger.info(`Scheduled deletion in ${deletionTime / 60000} minutes.`)
         setTimeout(() => {
-            ;[rares, raresPlus].forEach((file) => {
+            ;[rares].forEach((file) => {
                 unlink(file, (err) => {
                     if (err) Logger.error(`Failed to delete ${file}:`, err)
                     else Logger.info(`Deleted ${file}`)
