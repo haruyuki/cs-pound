@@ -6,7 +6,7 @@ import { CookieJar } from "tough-cookie"
 
 import { Logger } from "./logger.js"
 
-export const BOT_VERSION = "2024.10.26"
+export const BOT_VERSION = "2025.02.15"
 const COOKIE_FILE_PATH = "./cookies.json"
 export const HEADERS = {
     "User-Agent": "CS Pound Discord Bot Agent " + BOT_VERSION,
@@ -56,12 +56,12 @@ export async function makePOSTRequest(
     try {
         const client = stateless
             ? axios.create({
-                  withCredentials: false,
-                  headers: {
-                      ...HEADERS,
-                      "Content-Type": "application/x-www-form-urlencoded",
-                  },
-              })
+                withCredentials: false,
+                headers: {
+                    ...HEADERS,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            })
             : axiosClient
 
         const response = await client.post(url, data, {
