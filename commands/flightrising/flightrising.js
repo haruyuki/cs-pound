@@ -87,23 +87,19 @@ export async function execute(interaction) {
     const subcommand = interaction.options.getSubcommand()
     const amount = interaction.options.getNumber("amount")
 
-    if (subcommand === "gems") {
-        await gemsCommand(interaction, amount)
+    const subcommandHandlers = {
+        "gems": () => gemsCommand(interaction, amount),
+        "treasure": () => treasureCommand(interaction, amount),
+        "cs": () => csCommand(interaction, amount),
+        "progeny": async () => {
+            const dragon1 = interaction.options.getNumber("dragon1")
+            const dragon2 = interaction.options.getNumber("dragon2")
+            const element = interaction.options.getNumber("element")
+            await progenyCommand(interaction, dragon1, dragon2, element)
+        },
     }
 
-    if (subcommand === "treasure") {
-        await treasureCommand(interaction, amount)
-    }
-
-    if (subcommand === "cs") {
-        await csCommand(interaction, amount)
-    }
-
-    if (subcommand === "progeny") {
-        const dragon1 = interaction.options.getNumber("dragon1")
-        const dragon2 = interaction.options.getNumber("dragon2")
-        const element = interaction.options.getNumber("element")
-
-        await progenyCommand(interaction, dragon1, dragon2, element)
+    if (subcommandHandlers[subcommand]) {
+        await subcommandHandlers[subcommand]()
     }
 }
