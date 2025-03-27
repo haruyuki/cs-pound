@@ -39,10 +39,13 @@ const fetchForeseeLinks = async (dragon1, dragon2, count) => {
     const progenyURL = `https://flightrising.com/includes/ol/scryer_progeny.php?id1=${dragon1}&id2=${dragon2}`
     const progenyLinks = []
 
+    // Configure cache options - don't cache these requests as they should be unique each time
+    const cacheOptions = { use: false }
+
     // Use concurrency for multiple fetches
     await Promise.all(
         Array.from({ length: count }).map(async () => {
-            const $ = await makeGETRequest(progenyURL)
+            const $ = await makeGETRequest(progenyURL, cacheOptions)
             progenyLinks.push(...getOffspringImages($))
         }),
     )
@@ -63,22 +66,23 @@ const adjustElementForLinks = (progenyLinks, element) => {
 }
 
 const fetchPredictLinks = async (dragonCombinations) => {
-    const images = await Promise.all(
+    return Promise.all(
         dragonCombinations.map(async (combination) => {
             const payload = new URLSearchParams(combination)
-            const url = `https://www1.flightrising.com/scrying/ajax-predict?${payload.toString()}`
+
+            // Configure cache options - don't cache these POST requests as they contain unique data
+            const cacheOptions = { use: false }
 
             const data = await makePOSTRequest(
                 "https://www1.flightrising.com/scrying/ajax-predict",
                 payload.toString(),
                 false,
                 true,
+                cacheOptions,
             )
             return "https://flightrising.com" + data.dragon_url
         }),
     )
-
-    return images
 }
 
 function getOffspringImages($) {
@@ -111,7 +115,7 @@ async function createImage(imageUrls, imagesPerRow = 8) {
         create: {
             width: gridWidth,
             height: gridHeight,
-            channels: 4, // RGBA
+            channels: 4,
             background: { r: 222, g: 218, b: 207, alpha: 1 },
         },
     })

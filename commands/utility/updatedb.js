@@ -1,9 +1,8 @@
-import axios from "axios"
-import * as cheerio from "cheerio"
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 
 import { ItemDB, PetDB } from "../../lib.js"
 import { Logger } from "../../logger.js"
+import { makeGETRequest } from "../../webrequests.js"
 
 const EXCEPTIONS = new Set([
     "3B46301A6C8B850D87A730DA365B0960",
@@ -20,16 +19,16 @@ const EXCEPTIONS = new Set([
 
 async function fetchEventLinks(year, type) {
     const url = `https://www.chickensmoothie.com/archive/${year}/${type === "pets" ? "" : "Items/"}`
-    const response = await axios.get(url)
-    const $ = cheerio.load(response.data)
+    // Use static cache type with longer TTL since archive pages rarely change
+    const $ = await makeGETRequest(url, { use: true, type: "static" })
     return $("li.event.active a, li.event a")
         .map((_, el) => $(el).attr("href"))
         .get()
 }
 
 async function processPage(pageLink, type, year, eventTitle) {
-    const pageResponse = await axios.get(pageLink)
-    const $ = cheerio.load(pageResponse.data)
+    // Use static cache type since these pages don't change frequently
+    const $ = await makeGETRequest(pageLink, { use: true, type: "static" })
 
     if (type === "pets") {
         const petLinks = $('img[alt="Pet"]')
@@ -140,8 +139,8 @@ export async function execute(interaction) {
         for (const event of eventLinks) {
             const link = decodeURIComponent(event.replace(/\?.*$/, ""))
             const baseLink = `https://www.chickensmoothie.com${encodeURI(link)}`
-            const eventResponse = await axios.get(baseLink)
-            const $ = cheerio.load(eventResponse.data)
+            // Use static cache type since event pages rarely change
+            const $ = await makeGETRequest(baseLink, { use: true, type: "static" })
 
             const eventTitle =
                 type === "pets" ? link.slice(14, -1) : link.slice(14, -7)

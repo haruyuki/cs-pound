@@ -5,7 +5,7 @@ import {
 } from "discord.js"
 import ms from "ms"
 
-import { BOT_VERSION } from "../../lib.js"
+import { BOT_VERSION } from "../../config.js"
 
 export const data = new SlashCommandBuilder()
     .setName("stats")

@@ -88,10 +88,10 @@ export async function execute(interaction) {
     const amount = interaction.options.getNumber("amount")
 
     const subcommandHandlers = {
-        "gems": () => gemsCommand(interaction, amount),
-        "treasure": () => treasureCommand(interaction, amount),
-        "cs": () => csCommand(interaction, amount),
-        "progeny": async () => {
+        gems: () => gemsCommand(interaction, amount),
+        treasure: () => treasureCommand(interaction, amount),
+        cs: () => csCommand(interaction, amount),
+        progeny: async () => {
             const dragon1 = interaction.options.getNumber("dragon1")
             const dragon2 = interaction.options.getNumber("dragon2")
             const element = interaction.options.getNumber("element")

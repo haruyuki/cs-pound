@@ -2,22 +2,20 @@ import { readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { ActivityType, Client, Collection, GatewayIntentBits } from "discord.js"
-import dotenv from "dotenv"
 
+import { DISCORD_CONFIG } from "./config.js"
 import { Logger } from "./logger.js"
-
-dotenv.config()
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: DISCORD_CONFIG.INTENTS.map((intent) => GatewayIntentBits[intent]),
     presence: {
         activities: [
             {
-                name: "Need help? https://support.haruyuki.moe",
-                type: ActivityType.Playing,
+                name: DISCORD_CONFIG.PRESENCE.ACTIVITY_NAME,
+                type: ActivityType[DISCORD_CONFIG.PRESENCE.ACTIVITY_TYPE],
             },
         ],
     },
@@ -75,7 +73,7 @@ async function init() {
     await loadCommands()
     Logger.info("Loading events...")
     await loadEvents()
-    await client.login(process.env.DISCORD_TOKEN)
+    await client.login(DISCORD_CONFIG.TOKEN)
 }
 
 init()

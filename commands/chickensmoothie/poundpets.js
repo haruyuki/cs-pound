@@ -59,6 +59,7 @@ export async function execute(interaction) {
 
     try {
         Logger.debug("Fetching rare pets from the pound")
+        // Get rare pets from the pound using the updated function
         const rarePets = await getRarePoundPets()
 
         const rares = await generateImage(rarePets, "rares.png")

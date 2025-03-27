@@ -1,29 +1,62 @@
 import { writeFileSync } from "node:fs"
+import { performance } from "node:perf_hooks"
 import { Solver } from "@2captcha/captcha-solver"
 import dotenv from "dotenv"
 import { google } from "googleapis"
 import { MongoClient } from "mongodb"
 import Sequelize, { NUMBER, STRING } from "sequelize"
 
+import {
+    CAPTCHA_CONFIG,
+    COOKIE_FILE_PATH,
+    CS_CONFIG,
+    DATABASE_CONFIG,
+} from "./config.js"
 import { Logger } from "./logger.js"
 import { cookieJar, makeGETRequest, makePOSTRequest } from "./webrequests.js"
 
 dotenv.config()
 
-export const BOT_VERSION = "2024.10.26"
-const COOKIE_FILE_PATH = "./cookies.json"
-const CS_USERNAME = process.env.CS_USERNAME
-const CS_PASSWORD = process.env.CS_PASSWORD
 export let POUND_REMIND_TIMES = []
 export let LAF_REMIND_TIMES = []
-const POUND_URL =
-    "https://www.chickensmoothie.com/accounts/viewgroup.php?userid=2887&groupid=5813&pageSize=3000"
 const RARE_RARITIES = ["Rare", "Very rare", "Extremely rare", "OMG so rare!"]
 
-const solver = new Solver(process.env.CAPTCHA_API_KEY)
-const client = new MongoClient(process.env.MONGODB_URI)
-const database = client.db("cs_pound")
-const collection = database.collection("auto_remind")
+const solver = new Solver(CAPTCHA_CONFIG.API_KEY)
+
+// Configure MongoDB with connection pooling
+const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI, {
+    maxPoolSize: DATABASE_CONFIG.MONGODB.CONNECTION_POOL.MAX_POOL_SIZE,
+    minPoolSize: DATABASE_CONFIG.MONGODB.CONNECTION_POOL.MIN_POOL_SIZE,
+    maxIdleTimeMS: DATABASE_CONFIG.MONGODB.CONNECTION_POOL.MAX_IDLE_TIME_MS,
+    connectTimeoutMS:
+        DATABASE_CONFIG.MONGODB.CONNECTION_POOL.CONNECT_TIMEOUT_MS,
+    socketTimeoutMS: DATABASE_CONFIG.MONGODB.CONNECTION_POOL.SOCKET_TIMEOUT_MS,
+})
+
+// Initialize MongoDB connection
+let database
+let collection
+
+// Connect to MongoDB asynchronously
+async function connectToMongoDB() {
+    try {
+        const startTime = performance.now()
+        await client.connect()
+        database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)
+        collection = database.collection(DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND)
+        const endTime = performance.now()
+        Logger.success(
+            `Connected to MongoDB (${Math.round(endTime - startTime)}ms)`,
+        )
+        return true
+    } catch (error) {
+        Logger.error(`MongoDB connection error: ${error.message}`)
+        return false
+    }
+}
+
+// Initialize connection
+connectToMongoDB()
 
 // Function to save the cookies to a file
 function saveCookiesToFile(jar, filepath) {
@@ -34,7 +67,23 @@ function saveCookiesToFile(jar, filepath) {
 export const sequelize = new Sequelize({
     dialect: "sqlite",
     logging: false,
-    storage: "chickensmoothie.db",
+    storage: DATABASE_CONFIG.SQLITE.FILENAME,
+    // Performance optimizations
+    pool: DATABASE_CONFIG.SQLITE.POOL,
+    // Disable automatic pluralization of table names
+    define: {
+        freezeTableName: true,
+        timestamps: false,
+    },
+    // Enable query caching
+    dialectOptions: {
+        // SQLite specific options
+        pragma: {
+            cache_size: DATABASE_CONFIG.SQLITE.PRAGMA.CACHE_SIZE,
+            journal_mode: DATABASE_CONFIG.SQLITE.PRAGMA.JOURNAL_MODE,
+            synchronous: DATABASE_CONFIG.SQLITE.PRAGMA.SYNCHRONOUS,
+        },
+    },
 })
 
 export const PetDB = sequelize.define(
@@ -80,14 +129,12 @@ export const ItemDB = sequelize.define(
 // Function to attempt login without CAPTCHA
 const attemptLogin = async (captchaSolution = null) => {
     try {
-        const $ = await makeGETRequest(
-            "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
-        )
+        const $ = await makeGETRequest(CS_CONFIG.URLS.LOGIN)
 
         const csrfToken = $('input[name="csrf_token"]').val()
         const payload = new URLSearchParams()
-        payload.append("username", CS_USERNAME)
-        payload.append("password", CS_PASSWORD)
+        payload.append("username", CS_CONFIG.USERNAME)
+        payload.append("password", CS_CONFIG.PASSWORD)
         payload.append("autologin", "on")
         payload.append("login", "Login")
 
@@ -100,7 +147,7 @@ const attemptLogin = async (captchaSolution = null) => {
         }
 
         const postLoginContent = await makePOSTRequest(
-            "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
+            CS_CONFIG.URLS.LOGIN,
             payload.toString(),
             true,
             false,
@@ -145,7 +192,7 @@ export const login = async () => {
         // Step 3: Solve the reCAPTCHA
         const captchaSolution = await solver.recaptcha({
             googlekey: siteKey,
-            pageurl: "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
+            pageurl: CS_CONFIG.URLS.LOGIN,
         })
 
         if (!captchaSolution || !captchaSolution.data) {
@@ -169,16 +216,47 @@ export const login = async () => {
 }
 
 export const updateAutoRemindTimes = async () => {
-    POUND_REMIND_TIMES = await collection.distinct("pound")
-    LAF_REMIND_TIMES = await collection.distinct("laf")
+    try {
+        const startTime = performance.now()
+
+        // Ensure we have a valid MongoDB connection
+        if (!client.db) {
+            Logger.warn("MongoDB connection lost, attempting to reconnect...")
+            await connectToMongoDB()
+        }
+
+        // Execute both queries in parallel for better performance
+        const [poundTimes, lafTimes] = await Promise.all([
+            collection.distinct("pound"),
+            collection.distinct("laf"),
+        ])
+
+        // Update the global variables
+        POUND_REMIND_TIMES = poundTimes
+        LAF_REMIND_TIMES = lafTimes
+
+        const endTime = performance.now()
+        Logger.debug(
+            `Updated auto-remind times (${Math.round(endTime - startTime)}ms)`,
+        )
+    } catch (error) {
+        Logger.error(`Error updating auto-remind times: ${error.message}`)
+        // Return default values in case of error
+        POUND_REMIND_TIMES = []
+        LAF_REMIND_TIMES = []
+    }
 }
 
 export const getOpeningTime = async () => {
     try {
+        const startTime = performance.now()
+
+        // Use a short cache TTL for opening time data (30 seconds)
+        // This reduces load on the CS server while still keeping data fresh
+        const cacheOptions = { use: true, type: "short" }
+
         // Make the request to the URL using axiosClient and the existing cookie jar
-        const $ = await makeGETRequest(
-            "https://www.chickensmoothie.com/poundandlostandfound.php",
-        )
+        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_LAF, cacheOptions)
 
         // Extract the last <h2> element's text content
         const text = $("h2:last-of-type").text().trim()
@@ -193,6 +271,11 @@ export const getOpeningTime = async () => {
                 ? "#pets_remaining"
                 : "#items_remaining"
             const thingsRemaining = parseNumber($(remainingSelector).text())
+
+            const endTime = performance.now()
+            Logger.debug(
+                `getOpeningTime (open): ${Math.round(endTime - startTime)}ms`,
+            )
 
             return {
                 openingType: isPound ? "pound" : "lost and found",
@@ -254,11 +337,43 @@ export const authenticate = () => {
 }
 
 export const getAutoRemindDocuments = async (time, openingType) => {
-    if (openingType === "pound") {
-        return await collection.find({ pound: time }).toArray()
-    }
-    if (openingType === "lost and found") {
-        return await collection.find({ laf: time }).toArray()
+    try {
+        const startTime = performance.now()
+
+        // Ensure we have a valid MongoDB connection
+        if (!client.db) {
+            Logger.warn("MongoDB connection lost, attempting to reconnect...")
+            await connectToMongoDB()
+        }
+
+        // Create a more efficient query with proper indexing
+        let query
+        if (openingType === "pound") {
+            query = { pound: time }
+        } else if (openingType === "lost and found") {
+            query = { laf: time }
+        } else {
+            return []
+        }
+
+        // Only retrieve the fields we need to reduce data transfer
+        const projection = { user_id: 1, channel_id: 1, _id: 0 }
+
+        // Execute the query with the projection
+        const results = await collection
+            .find(query)
+            .project(projection)
+            .toArray()
+
+        const endTime = performance.now()
+        Logger.debug(
+            `Retrieved ${results.length} auto-remind documents for ${openingType}:${time} (${Math.round(endTime - startTime)}ms)`,
+        )
+
+        return results
+    } catch (error) {
+        Logger.error(`Error retrieving auto-remind documents: ${error.message}`)
+        return []
     }
 }
 
@@ -268,7 +383,7 @@ export const getRarePoundPets = async () => {
 
     try {
         // Fetch the pound page HTML using axiosClient
-        const $ = await makeGETRequest(POUND_URL)
+        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_GROUP)
         const allPets = []
 
         // Loop through all pets and extract rare pets
