@@ -14,7 +14,7 @@ export const data = new SlashCommandBuilder()
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 
 export async function execute(interaction) {
-    const state = interaction.options.getString("state")
+    const state = interaction.options.getBoolean("enable")
 
     // If state is provided, set debug mode accordingly
     if (state) {
