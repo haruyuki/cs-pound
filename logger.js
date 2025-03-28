@@ -15,6 +15,9 @@ const levels = {
 
 const white = chalk.white
 
+// Debug mode flag - controls whether debug messages are displayed
+let debugMode = false
+
 export const Logger = {
     info: (message) =>
         console.log(
@@ -32,8 +35,18 @@ export const Logger = {
         console.log(
             `${levels.success(`[${getTimestamp()}] SUCCESS:`)} ${white(message)}`,
         ),
-    debug: (message) =>
-        console.log(
-            `${levels.debug(`[${getTimestamp()}] DEBUG:`)} ${white(message)}`,
-        ),
+    debug: (message) => {
+        // Only log debug messages if debug mode is enabled
+        if (debugMode) {
+            console.log(
+                `${levels.debug(`[${getTimestamp()}] DEBUG:`)} ${white(message)}`,
+            )
+        }
+    },
+    enableDebug() {
+        debugMode = true
+    },
+    disableDebug() {
+        debugMode = false
+    },
 }
