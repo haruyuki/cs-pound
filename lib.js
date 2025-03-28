@@ -43,7 +43,9 @@ async function connectToMongoDB() {
         const startTime = performance.now()
         await client.connect()
         database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)
-        collection = database.collection(DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND)
+        collection = database.collection(
+            DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND,
+        )
         const endTime = performance.now()
         Logger.success(
             `Connected to MongoDB (${Math.round(endTime - startTime)}ms)`,
@@ -251,9 +253,7 @@ export const getOpeningTime = async () => {
     try {
         const startTime = performance.now()
 
-        // Use a short cache TTL for opening time data (30 seconds)
-        // This reduces load on the CS server while still keeping data fresh
-        const cacheOptions = { use: true, type: "short" }
+        const cacheOptions = { use: false, type: "short" }
 
         // Make the request to the URL using axiosClient and the existing cookie jar
         const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_LAF, cacheOptions)

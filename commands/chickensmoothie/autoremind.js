@@ -1,10 +1,13 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js"
 import { MongoClient } from "mongodb"
+
 import { DATABASE_CONFIG } from "../../config.js"
 
 const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI)
 const database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)
-const collection = database.collection(DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND)
+const collection = database.collection(
+    DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND,
+)
 
 export const data = new SlashCommandBuilder()
     .setName("autoremind")

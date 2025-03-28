@@ -140,7 +140,10 @@ export async function execute(interaction) {
             const link = decodeURIComponent(event.replace(/\?.*$/, ""))
             const baseLink = `https://www.chickensmoothie.com${encodeURI(link)}`
             // Use static cache type since event pages rarely change
-            const $ = await makeGETRequest(baseLink, { use: true, type: "static" })
+            const $ = await makeGETRequest(baseLink, {
+                use: true,
+                type: "static",
+            })
 
             const eventTitle =
                 type === "pets" ? link.slice(14, -1) : link.slice(14, -7)

@@ -1,12 +1,14 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 import { MongoClient } from "mongodb"
 
-import { Logger } from "../../logger.js"
 import { DATABASE_CONFIG } from "../../config.js"
+import { Logger } from "../../logger.js"
 
 const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI)
 const database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)
-const collection = database.collection(DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND)
+const collection = database.collection(
+    DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND,
+)
 
 export const data = new SlashCommandBuilder()
     .setName("checkusers")
