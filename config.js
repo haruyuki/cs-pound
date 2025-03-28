@@ -97,11 +97,10 @@ export const TASK_CONFIG = {
     OPENING_COUNTDOWN: {
         // minutes
         DEFAULT_CHECK_INTERVAL: 60,
-        // 3 seconds between channel notifications
-        REMINDER_STAGGER_DELAY: 3000,
+        // 2 seconds between channel notifications
+        REMINDER_STAGGER_DELAY: 2000,
         // 1 second between message batches
         MESSAGE_BATCH_DELAY: 1000,
-        // Discord best practice
         MAX_MENTIONS_PER_MESSAGE: 50,
     },
 }
