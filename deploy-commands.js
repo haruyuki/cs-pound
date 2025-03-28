@@ -163,6 +163,8 @@ async function loadCommands() {
         }
     } catch (error) {
         Logger.warn(error)
+    } finally {
+        process.exit(0)
     }
 }
 
