@@ -8,9 +8,9 @@ import { DATABASE_CONFIG } from "../../config.js"
 export const sequelize = new Sequelize({
     dialect: "sqlite",
     logging: false,
-    storage: DATABASE_CONFIG.SQLITE.FILENAME,
+    storage: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.FILENAME,
     // Performance optimizations
-    pool: DATABASE_CONFIG.SQLITE.POOL,
+    pool: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.POOL,
     // Disable automatic pluralization of table names
     define: {
         freezeTableName: true,
@@ -20,9 +20,9 @@ export const sequelize = new Sequelize({
     dialectOptions: {
         // SQLite specific options
         pragma: {
-            cache_size: DATABASE_CONFIG.SQLITE.PRAGMA.CACHE_SIZE,
-            journal_mode: DATABASE_CONFIG.SQLITE.PRAGMA.JOURNAL_MODE,
-            synchronous: DATABASE_CONFIG.SQLITE.PRAGMA.SYNCHRONOUS,
+            cache_size: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.CACHE_SIZE,
+            journal_mode: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.JOURNAL_MODE,
+            synchronous: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.SYNCHRONOUS,
         },
     },
 })

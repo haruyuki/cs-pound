@@ -56,7 +56,7 @@ export const DATABASE_CONFIG = {
         },
     },
     // SQLite settings
-    SQLITE: {
+    CHICKENSMOOTHIE_DB: {
         FILENAME: "chickensmoothie.db",
         POOL: {
             MAX: 5,

@@ -8,7 +8,7 @@ import {
     LAF_REMIND_TIMES,
     POUND_REMIND_TIMES,
     updateAutoRemindTimes,
-} from "../utils/database/database.js"
+} from "../utils/database/mongo-db.js"
 
 let lessThanOneHourRemaining = false
 let timeoutTime = 60

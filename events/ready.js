@@ -4,8 +4,8 @@ import { BOT_VERSION } from "../config.js"
 import { openingCountdown } from "../tasks/openingCountdown.js"
 import { login } from "../utils/api/auth.js"
 import { Logger } from "../utils/common/logger.js"
-import { ItemDB, PetDB, sequelize } from "../utils/database/sqlite.js"
-import { updateAutoRemindTimes } from "../utils/database/database.js"
+import { ItemDB, PetDB, sequelize } from "../utils/database/chickensmoothie-db.js"
+import { updateAutoRemindTimes } from "../utils/database/mongo-db.js"
 
 export const name = Events.ClientReady
 export const once = true
