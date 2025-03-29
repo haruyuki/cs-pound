@@ -3,11 +3,11 @@ import { performance } from "node:perf_hooks"
 import { TASK_CONFIG } from "../config.js"
 import {
     getAutoRemindDocuments,
-    getOpeningTime,
     LAF_REMIND_TIMES,
     POUND_REMIND_TIMES,
     updateAutoRemindTimes,
-} from "../utils/lib.js"
+} from "../utils/database.js"
+import { getOpeningTime } from "../utils/chickensmoothie.js"
 import { Logger } from "../utils/logger.js"
 
 let lessThanOneHourRemaining = false

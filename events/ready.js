@@ -1,13 +1,13 @@
 import { Events } from "discord.js"
 
 import { openingCountdown } from "../tasks/openingCountdown.js"
+import { login } from "../utils/auth.js"
 import {
     ItemDB,
-    login,
     PetDB,
     sequelize,
     updateAutoRemindTimes,
-} from "../utils/lib.js"
+} from "../utils/database.js"
 import { Logger } from "../utils/logger.js"
 
 export const name = Events.ClientReady

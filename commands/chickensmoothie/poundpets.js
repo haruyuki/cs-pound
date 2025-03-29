@@ -3,7 +3,7 @@ import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
 import fetch from "node-fetch"
 import sharp from "sharp"
 
-import { getOpeningTime, getRarePoundPets } from "../../utils/lib.js"
+import { getOpeningTime, getRarePoundPets } from "../../utils/chickensmoothie.js"
 import { Logger } from "../../utils/logger.js"
 
 if (existsSync("rares.png")) {

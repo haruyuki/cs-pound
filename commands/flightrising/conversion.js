@@ -1,4 +1,4 @@
-import { authenticate } from "../../utils/lib.js"
+import { authenticate } from "../../utils/auth.js"
 import { Logger } from "../../utils/logger.js"
 
 export async function gemsCommand(interaction, amount) {

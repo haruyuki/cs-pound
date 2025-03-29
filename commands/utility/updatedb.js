@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 
-import { ItemDB, PetDB } from "../../utils/lib.js"
+import { ItemDB, PetDB } from "../../utils/database.js"
 import { Logger } from "../../utils/logger.js"
 import { makeGETRequest } from "../../utils/webrequests.js"
 
