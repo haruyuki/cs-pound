@@ -101,15 +101,10 @@ export async function execute(interaction) {
 }
 
 async function fetchImage(url) {
-    try {
-        const response = await fetch(url)
-        if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const buffer = await response.arrayBuffer()
-        return sharp(buffer)
-    } catch (error) {
-        Logger.error(`Image fetch failed: ${url} - ${error.message}`)
-        return null
-    }
+    const response = await fetch(url)
+    if (!response.ok) return null
+    const buffer = await response.arrayBuffer()
+    return sharp(buffer)
 }
 
 async function generateImage(pets, filename) {

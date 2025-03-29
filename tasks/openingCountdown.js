@@ -180,7 +180,7 @@ export async function openingCountdown(client) {
 async function sendReminderToChannel(
     channel,
     minutesLeft,
-    openingType,
+    reminderOpeningType,
     documents,
 ) {
     try {
@@ -190,7 +190,7 @@ async function sendReminderToChannel(
         minutesLeft++
 
         // Create the message prefix
-        const messagePrefix = `${minutesLeft} minute${minutesLeft > 1 ? "s" : ""} until the ${openingType} opens! `
+        const messagePrefix = `${minutesLeft} minute${minutesLeft > 1 ? "s" : ""} until the ${reminderOpeningType} opens! `
 
         // Extract user IDs efficiently
         const userIds = documents.map((doc) => doc.user_id)
