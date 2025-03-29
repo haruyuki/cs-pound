@@ -11,13 +11,21 @@ dotenv.config()
 
 const solver = new Solver(CAPTCHA_CONFIG.API_KEY)
 
-// Function to save the cookies to a file
+/**
+ * Saves cookies to a file for persistent storage
+ * @param {CookieJar} jar - The cookie jar containing cookies to save
+ * @param {string} filepath - The path where the cookies will be saved
+ */
 function saveCookiesToFile(jar, filepath) {
     const serializedCookies = JSON.stringify(jar.serializeSync())
     writeFileSync(filepath, serializedCookies, "utf-8")
 }
 
-// Function to attempt login without CAPTCHA
+/**
+ * Attempts to log in to the Chicken Smoothie website
+ * @param {string|null} captchaSolution - Optional CAPTCHA solution if required
+ * @returns {Promise<{success: boolean, html: object|null}>} Login result with success status and HTML content
+ */
 const attemptLogin = async (captchaSolution = null) => {
     try {
         const $ = await makeGETRequest(CS_CONFIG.URLS.LOGIN)
@@ -58,7 +66,12 @@ const attemptLogin = async (captchaSolution = null) => {
     }
 }
 
-// Function to check for CAPTCHA and retry login if present
+/**
+ * Handles the complete login process including CAPTCHA solving if needed
+ * Attempts a normal login first, and if that fails due to CAPTCHA,
+ * solves the CAPTCHA and tries again
+ * @returns {Promise<void>}
+ */
 export const login = async () => {
     try {
         // Step 1: Attempt to log in without CAPTCHA
@@ -106,7 +119,10 @@ export const login = async () => {
     }
 }
 
-// Google Sheets authentication
+/**
+ * Authenticates with Google Sheets API using service account credentials
+ * @returns {object} Configured Google Sheets API client with authentication
+ */
 export const authenticate = () => {
     const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS)
     const auth = new google.auth.JWT(

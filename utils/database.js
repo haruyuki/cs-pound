@@ -5,7 +5,9 @@ import Sequelize, { NUMBER, STRING } from "sequelize"
 import { DATABASE_CONFIG } from "../config.js"
 import { Logger } from "./logger.js"
 
-// MongoDB setup
+/**
+ * MongoDB collections for storing auto-remind times
+ */
 export let POUND_REMIND_TIMES = []
 export let LAF_REMIND_TIMES = []
 
@@ -23,7 +25,10 @@ const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI, {
 let database
 let collection
 
-// Connect to MongoDB asynchronously
+/**
+ * Establishes a connection to MongoDB
+ * @returns {Promise<boolean>} True if connection was successful, false otherwise
+ */
 async function connectToMongoDB() {
     try {
         const startTime = performance.now()
@@ -46,7 +51,9 @@ async function connectToMongoDB() {
 // Initialize connection
 connectToMongoDB()
 
-// SQLite setup
+/**
+ * SQLite database connection using Sequelize ORM
+ */
 export const sequelize = new Sequelize({
     dialect: "sqlite",
     logging: false,
@@ -111,7 +118,11 @@ export const ItemDB = sequelize.define(
     },
 )
 
-// Function to update auto-remind times from MongoDB
+/**
+ * Updates the global auto-remind times arrays from MongoDB
+ * Fetches distinct pound and lost-and-found times from the database
+ * @returns {Promise<void>}
+ */
 export const updateAutoRemindTimes = async () => {
     try {
         const startTime = performance.now()
@@ -144,7 +155,12 @@ export const updateAutoRemindTimes = async () => {
     }
 }
 
-// Function to get auto-remind documents
+/**
+ * Retrieves auto-remind documents from MongoDB based on time and opening type
+ * @param {number} time - The time in minutes to get reminders for
+ * @param {string} openingType - The type of opening ('pound' or 'lost and found')
+ * @returns {Promise<Array>} Array of documents containing user_id and channel_id
+ */
 export const getAutoRemindDocuments = async (time, openingType) => {
     try {
         const startTime = performance.now()

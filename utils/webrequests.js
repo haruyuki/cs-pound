@@ -41,7 +41,11 @@ const axiosClient = wrapper(
     }),
 )
 
-// Function to load cookies from a file
+/**
+ * Loads cookies from a file or creates a new cookie jar if the file doesn't exist
+ * @param {string} filepath - Path to the cookie file
+ * @returns {CookieJar} The loaded cookie jar or a new one if file doesn't exist
+ */
 function loadCookiesFromFile(filepath) {
     Logger.debug("Loading cookies from file...")
     if (existsSync(filepath)) {
@@ -52,6 +56,15 @@ function loadCookiesFromFile(filepath) {
     return new CookieJar()
 }
 
+/**
+ * Makes a GET request to the specified URL with caching support
+ * @param {string} url - The URL to make the GET request to
+ * @param {Object} cacheOptions - Options for caching the response
+ * @param {boolean} cacheOptions.use - Whether to use caching (default: true)
+ * @param {string} cacheOptions.type - Cache type to use: "general", "short", or "static" (default: "general")
+ * @returns {Promise<Object>} Cheerio object containing the parsed HTML response
+ * @throws {Error} If the request fails
+ */
 export async function makeGETRequest(
     url,
     cacheOptions = { use: true, type: "general" },
@@ -88,6 +101,18 @@ export async function makeGETRequest(
     }
 }
 
+/**
+ * Makes a POST request to the specified URL
+ * @param {string} url - The URL to make the POST request to
+ * @param {string|Object} data - The data to send in the request body
+ * @param {boolean} includeCredentials - Whether to include credentials in the request (default: false)
+ * @param {boolean} stateless - Whether to use a stateless client without cookies (default: false)
+ * @param {Object} cacheOptions - Options for caching the response
+ * @param {boolean} cacheOptions.use - Whether to use caching (default: false)
+ * @param {string} cacheOptions.type - Cache type to use: "general", "short", or "static" (default: "general")
+ * @returns {Promise<Object>} Cheerio object containing the parsed HTML response or JSON data
+ * @throws {Error} If the request fails
+ */
 export async function makePOSTRequest(
     url,
     data,

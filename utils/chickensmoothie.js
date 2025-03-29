@@ -7,7 +7,14 @@ import { makeGETRequest } from "./webrequests.js"
 
 const RARE_RARITIES = ["Rare", "Very rare", "Extremely rare", "OMG so rare!"]
 
-// Function to get the opening time for Pound or Lost and Found
+/**
+ * Gets the current opening time information for the Pound or Lost and Found
+ * @returns {Promise<Object|null>} Object containing opening type, time remaining in minutes, and things remaining count,
+ *                                or null if information couldn't be retrieved
+ * @property {string} openingType - Either "pound" or "lost and found"
+ * @property {number} timeRemaining - Time remaining in minutes until opening
+ * @property {number} thingsRemaining - Number of pets/items remaining if already open
+ */
 export const getOpeningTime = async () => {
     try {
         const startTime = performance.now()
@@ -70,7 +77,11 @@ export const getOpeningTime = async () => {
     }
 }
 
-// Function to get rare pets from the pound
+/**
+ * Retrieves rare pets currently available in the pound
+ * Logs in first to ensure access to the pound page
+ * @returns {Promise<Array>} Array of rare pets with their details [imageUrl, adoptionDate, rarity]
+ */
 export const getRarePoundPets = async () => {
     // Log in and check if successful
     await login()
@@ -108,7 +119,11 @@ export const getRarePoundPets = async () => {
     }
 }
 
-// Utility function to parse numbers safely
+/**
+ * Safely extracts and parses a number from a text string
+ * @param {string} text - The text containing a number
+ * @returns {number} The parsed integer or 0 if no number found
+ */
 const parseNumber = (text) => {
     const match = text.match(/\d+/)
     return match ? parseInt(match[0]) : 0
