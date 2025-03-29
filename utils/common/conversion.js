@@ -1,4 +1,4 @@
-import { convertCurrency, getExchangeRates } from "./flightrising.js"
+import { convertCurrency, getExchangeRates } from "../api/flightrising.js"
 
 /**
  * Handles the gems conversion command

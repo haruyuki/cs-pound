@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb"
 
-import { DATABASE_CONFIG } from "../config.js"
-import { Logger } from "./logger.js"
+import { DATABASE_CONFIG } from "../../config.js"
+import { Logger } from "../common/logger.js"
 
 // MongoDB client setup
 const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI)

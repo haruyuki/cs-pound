@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from "discord.js"
 
+import { ELEMENTS } from "../../utils/api/flightrising.js"
 import {
     handleCSConversion,
     handleGemsConversion,
     handleTreasureConversion,
-} from "../../utils/conversion.js"
-import { ELEMENTS } from "../../utils/flightrising.js"
+} from "../../utils/common/conversion.js"
 import { progenyCommand } from "./progeny.js"
 
 export const data = new SlashCommandBuilder()

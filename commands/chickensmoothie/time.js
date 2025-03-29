@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from "discord.js"
 import {
     formatTimeResponse,
     getOpeningTime,
-} from "../../utils/chickensmoothie.js"
+} from "../../utils/api/chickensmoothie.js"
 
 export const data = new SlashCommandBuilder()
     .setName("time")

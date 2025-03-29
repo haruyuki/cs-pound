@@ -1,4 +1,4 @@
-import { handleProgeny } from "../../utils/progeny.js"
+import { handleProgeny } from "../../utils/api/progeny.js"
 
 /**
  * Command handler for the progeny subcommand

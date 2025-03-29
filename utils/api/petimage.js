@@ -2,7 +2,7 @@ import { existsSync, unlink } from "node:fs"
 import fetch from "node-fetch"
 import sharp from "sharp"
 
-import { Logger } from "./logger.js"
+import { Logger } from "../common/logger.js"
 
 /**
  * Fetches an image from a URL and returns a Sharp instance

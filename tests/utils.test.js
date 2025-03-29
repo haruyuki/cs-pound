@@ -1,4 +1,4 @@
-import { formatter, parseTimeString } from "../utils/utils.js"
+import { formatter, parseTimeString } from "../utils/time/utils.js"
 
 describe("formatter", () => {
     test("formats single seconds correctly", () => {

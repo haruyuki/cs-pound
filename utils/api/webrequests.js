@@ -4,9 +4,9 @@ import { wrapper } from "axios-cookiejar-support"
 import * as cheerio from "cheerio"
 import { CookieJar } from "tough-cookie"
 
-import { COOKIE_FILE_PATH, WEB_REQUEST_CONFIG } from "../config.js"
-import { Cache } from "./cache.js"
-import { Logger } from "./logger.js"
+import { COOKIE_FILE_PATH, WEB_REQUEST_CONFIG } from "../../config.js"
+import { Cache } from "../common/cache.js"
+import { Logger } from "../common/logger.js"
 
 export const HEADERS = WEB_REQUEST_CONFIG.HEADERS
 

@@ -2,8 +2,8 @@ import { unlink } from "node:fs"
 import fetch from "node-fetch"
 import sharp from "sharp"
 
+import { Logger } from "../common/logger.js"
 import { ELEMENTS } from "./flightrising.js"
-import { Logger } from "./logger.js"
 import { makeGETRequest, makePOSTRequest } from "./webrequests.js"
 
 /**

@@ -2,14 +2,14 @@ import { Events } from "discord.js"
 
 import { BOT_VERSION } from "../config.js"
 import { openingCountdown } from "../tasks/openingCountdown.js"
-import { login } from "../utils/auth.js"
+import { login } from "../utils/api/auth.js"
+import { Logger } from "../utils/common/logger.js"
 import {
     ItemDB,
     PetDB,
     sequelize,
     updateAutoRemindTimes,
-} from "../utils/database.js"
-import { Logger } from "../utils/logger.js"
+} from "../utils/database/database.js"
 
 export const name = Events.ClientReady
 export const once = true

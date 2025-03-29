@@ -1,5 +1,5 @@
+import { Logger } from "../common/logger.js"
 import { authenticate } from "./auth.js"
-import { Logger } from "./logger.js"
 
 /**
  * Flight Rising elements mapping

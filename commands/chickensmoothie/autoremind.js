@@ -1,6 +1,9 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js"
 
-import { removeAutoReminder, setAutoReminder } from "../../utils/autoremind.js"
+import {
+    removeAutoReminder,
+    setAutoReminder,
+} from "../../utils/api/autoremind.js"
 
 export const data = new SlashCommandBuilder()
     .setName("autoremind")

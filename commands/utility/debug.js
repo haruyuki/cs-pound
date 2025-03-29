@@ -4,7 +4,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js"
 
-import { Logger } from "../../utils/logger.js"
+import { Logger } from "../../utils/common/logger.js"
 
 export const data = new SlashCommandBuilder()
     .setName("debug")

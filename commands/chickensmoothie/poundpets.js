@@ -3,13 +3,13 @@ import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
 import {
     getOpeningTime,
     getRarePoundPets,
-} from "../../utils/chickensmoothie.js"
-import { Logger } from "../../utils/logger.js"
+} from "../../utils/api/chickensmoothie.js"
 import {
     cleanupExistingImage,
     generatePetImage,
     scheduleImageDeletion,
-} from "../../utils/petimage.js"
+} from "../../utils/api/petimage.js"
+import { Logger } from "../../utils/common/logger.js"
 
 // Clean up any existing image files on startup
 cleanupExistingImage("rares.png")

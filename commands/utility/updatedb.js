@@ -1,8 +1,8 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 
-import { ItemDB, PetDB } from "../../utils/database.js"
-import { Logger } from "../../utils/logger.js"
-import { makeGETRequest } from "../../utils/webrequests.js"
+import { makeGETRequest } from "../../utils/api/webrequests.js"
+import { Logger } from "../../utils/common/logger.js"
+import { ItemDB, PetDB } from "../../utils/database/sqlite.js"
 
 const EXCEPTIONS = new Set([
     "3B46301A6C8B850D87A730DA365B0960",

@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 
-import { getVersion } from "./utils/version.js"
+import { getVersion } from "./utils/common/version.js"
 
 dotenv.config()
 

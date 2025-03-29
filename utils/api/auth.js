@@ -3,8 +3,8 @@ import { Solver } from "@2captcha/captcha-solver"
 import dotenv from "dotenv"
 import { google } from "googleapis"
 
-import { CAPTCHA_CONFIG, COOKIE_FILE_PATH, CS_CONFIG } from "../config.js"
-import { Logger } from "./logger.js"
+import { CAPTCHA_CONFIG, COOKIE_FILE_PATH, CS_CONFIG } from "../../config.js"
+import { Logger } from "../common/logger.js"
 import { cookieJar, makeGETRequest, makePOSTRequest } from "./webrequests.js"
 
 dotenv.config()

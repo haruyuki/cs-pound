@@ -7,7 +7,7 @@ import {
     identifyPet,
     isItemLink,
     isValidChickenSmoothieLink,
-} from "../../utils/identification.js"
+} from "../../utils/api/identification.js"
 
 export const data = new SlashCommandBuilder()
     .setName("identify")
