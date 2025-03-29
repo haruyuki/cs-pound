@@ -2,8 +2,6 @@
  * Utility functions for time formatting specific to CS Pound bot
  */
 
-import { formatter } from "./utils.js"
-
 /**
  * Formats opening time for Pound or Lost and Found into a human-readable string
  * @param {string} openingType - The type of opening ("pound" or "lost and found")

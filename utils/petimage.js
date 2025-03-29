@@ -248,9 +248,11 @@ export function scheduleImageDeletion(filename, timeRemaining, onComplete) {
 export function cleanupExistingImage(filename) {
     if (existsSync(filename)) {
         unlink(filename, (err) => {
-            if (err)
+            if (err) {
                 Logger.error(`Startup cleanup failed for ${filename}:`, err)
-            else Logger.info(`Cleaned up old ${filename}`)
+            } else {
+                Logger.info(`Cleaned up old ${filename}`)
+            }
         })
     }
 }

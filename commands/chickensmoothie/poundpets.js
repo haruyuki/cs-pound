@@ -1,15 +1,15 @@
 import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
 
 import {
-    cleanupExistingImage,
-    generatePetImage,
-    scheduleImageDeletion,
-} from "../../utils/petimage.js"
-import {
     getOpeningTime,
     getRarePoundPets,
 } from "../../utils/chickensmoothie.js"
 import { Logger } from "../../utils/logger.js"
+import {
+    cleanupExistingImage,
+    generatePetImage,
+    scheduleImageDeletion,
+} from "../../utils/petimage.js"
 
 // Clean up any existing image files on startup
 cleanupExistingImage("rares.png")
