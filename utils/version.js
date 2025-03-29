@@ -3,6 +3,7 @@
  */
 
 import { execSync } from "child_process"
+import { Logger } from "./logger.js"
 
 /**
  * Gets the latest Git commit date and hash, and formats it as a version string (YYYY.MM.DD (Git hash))
@@ -30,7 +31,7 @@ export function getVersionFromGit() {
     } catch (error) {
         // Fallback to a default version if Git command fails
         console.error("Failed to get version from Git:", error.message)
-        return "0000.00.00" // Clearly indicates an error occurred
+        return "0000.00.00"
     }
 }
 
@@ -43,6 +44,7 @@ export function getVersion(fallbackVersion = "0000.00.00") {
     try {
         return getVersionFromGit()
     } catch (error) {
+        Logger.error("Failed to get version:", error.message)
         return fallbackVersion
     }
 }
