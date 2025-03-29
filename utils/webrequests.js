@@ -4,8 +4,8 @@ import { wrapper } from "axios-cookiejar-support"
 import * as cheerio from "cheerio"
 import { CookieJar } from "tough-cookie"
 
-import { Cache } from "./cache.js"
 import { COOKIE_FILE_PATH, WEB_REQUEST_CONFIG } from "../config.js"
+import { Cache } from "./cache.js"
 import { Logger } from "./logger.js"
 
 export const HEADERS = WEB_REQUEST_CONFIG.HEADERS
@@ -111,14 +111,14 @@ export async function makePOSTRequest(
         // Create appropriate client based on stateless flag
         const client = stateless
             ? axios.create({
-                withCredentials: false,
-                headers: {
-                    ...HEADERS,
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                // 10 seconds timeout
-                timeout: 10000,
-            })
+                  withCredentials: false,
+                  headers: {
+                      ...HEADERS,
+                      "Content-Type": "application/x-www-form-urlencoded",
+                  },
+                  // 10 seconds timeout
+                  timeout: 10000,
+              })
             : axiosClient
 
         Logger.debug(`Making POST request to ${url}`)

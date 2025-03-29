@@ -1,5 +1,6 @@
 import { Events } from "discord.js"
 
+import { openingCountdown } from "../tasks/openingCountdown.js"
 import {
     ItemDB,
     login,
@@ -8,7 +9,6 @@ import {
     updateAutoRemindTimes,
 } from "../utils/lib.js"
 import { Logger } from "../utils/logger.js"
-import { openingCountdown } from "../tasks/openingCountdown.js"
 
 export const name = Events.ClientReady
 export const once = true
