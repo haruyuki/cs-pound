@@ -136,14 +136,14 @@ export async function makePOSTRequest(
         // Create appropriate client based on stateless flag
         const client = stateless
             ? axios.create({
-                  withCredentials: false,
-                  headers: {
-                      ...HEADERS,
-                      "Content-Type": "application/x-www-form-urlencoded",
-                  },
-                  // 10 seconds timeout
-                  timeout: 10000,
-              })
+                withCredentials: false,
+                headers: {
+                    ...HEADERS,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                // 10 seconds timeout
+                timeout: 10000,
+            })
             : axiosClient
 
         Logger.debug(`Making POST request to ${url}`)
