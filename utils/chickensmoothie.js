@@ -1,9 +1,9 @@
 import { performance } from "node:perf_hooks"
 
 import { CS_CONFIG } from "../config.js"
+import { login } from "./auth.js"
 import { Logger } from "./logger.js"
 import { makeGETRequest } from "./webrequests.js"
-import { login } from "./auth.js"
 
 const RARE_RARITIES = ["Rare", "Very rare", "Extremely rare", "OMG so rare!"]
 

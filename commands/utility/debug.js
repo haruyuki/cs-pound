@@ -1,4 +1,8 @@
-import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import {
+    MessageFlags,
+    PermissionFlagsBits,
+    SlashCommandBuilder,
+} from "discord.js"
 
 import { Logger } from "../../utils/logger.js"
 
