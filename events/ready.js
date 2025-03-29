@@ -1,5 +1,6 @@
 import { Events } from "discord.js"
 
+import { BOT_VERSION } from "../config.js"
 import { openingCountdown } from "../tasks/openingCountdown.js"
 import { login } from "../utils/auth.js"
 import {
@@ -37,5 +38,7 @@ export async function execute(client) {
     Logger.info("Running openingCountdown background task...")
     await openingCountdown(client)
 
-    Logger.info(`Ready! Logged in as ${client.user.tag}`)
+    Logger.info(
+        `Ready! Logged in as ${client.user.tag} running version ${BOT_VERSION}`,
+    )
 }

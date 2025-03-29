@@ -1,15 +1,11 @@
-/**
- * Central configuration file for CS Pound Discord Bot
- * This file centralizes all configuration settings for easier management and optimization
- */
-
 import dotenv from "dotenv"
 
-// Load environment variables
+import { getVersion } from "./utils/version.js"
+
 dotenv.config()
 
 // Bot information
-export const BOT_VERSION = "2025.02.15"
+export const BOT_VERSION = getVersion()
 
 // File paths
 export const COOKIE_FILE_PATH = "./cookies.json"
@@ -107,7 +103,7 @@ export const TASK_CONFIG = {
 
 // Discord settings
 export const DISCORD_CONFIG = {
-    TOKEN: process.env.DISCORD_TOKEN,
+    TOKEN: process.env.DISCORD_TOKEN_DEV,
     INTENTS: ["Guilds"],
     PRESENCE: {
         ACTIVITY_TYPE: "Playing",
