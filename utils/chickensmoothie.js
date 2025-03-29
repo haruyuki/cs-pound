@@ -3,6 +3,7 @@ import { performance } from "node:perf_hooks"
 import { CS_CONFIG } from "../config.js"
 import { login } from "./auth.js"
 import { Logger } from "./logger.js"
+import { formatOpeningTime, formatOpenMessage } from "./time-utils.js"
 import { makeGETRequest } from "./webrequests.js"
 
 const RARE_RARITIES = ["Rare", "Very rare", "Extremely rare", "OMG so rare!"]
@@ -127,4 +128,24 @@ export const getRarePoundPets = async () => {
 const parseNumber = (text) => {
     const match = text.match(/\d+/)
     return match ? parseInt(match[0]) : 0
+}
+
+/**
+ * Formats a response for the time command based on opening time information
+ * @param {Object|null} openingTime - Opening time information object or null
+ * @returns {string} Formatted response message
+ */
+export const formatTimeResponse = (openingTime) => {
+    if (openingTime === null) {
+        return "Sorry, both the Pound and Lost and Found are closed at the moment."
+    }
+
+    const openingType =
+        openingTime.openingType === "pound" ? "Pound" : "Lost and Found"
+
+    if (openingTime.timeRemaining === 0) {
+        return formatOpenMessage(openingType, openingTime.thingsRemaining)
+    }
+
+    return formatOpeningTime(openingType, openingTime.timeRemaining)
 }

@@ -1,21 +1,12 @@
 import { SlashCommandBuilder } from "discord.js"
 
-import { csCommand, gemsCommand, treasureCommand } from "./conversion.js"
+import {
+    handleCSConversion,
+    handleGemsConversion,
+    handleTreasureConversion,
+} from "../../utils/conversion.js"
+import { ELEMENTS } from "../../utils/flightrising.js"
 import { progenyCommand } from "./progeny.js"
-
-export const ELEMENTS = {
-    earth: 1,
-    plague: 2,
-    wind: 3,
-    water: 4,
-    lightning: 5,
-    ice: 6,
-    shadow: 7,
-    light: 8,
-    arcane: 9,
-    nature: 10,
-    fire: 11,
-}
 
 export const data = new SlashCommandBuilder()
     .setName("flightrising")
@@ -83,14 +74,17 @@ export const data = new SlashCommandBuilder()
             ),
     )
 
+// Command handlers have been moved to utility files
+
 export async function execute(interaction) {
     const subcommand = interaction.options.getSubcommand()
     const amount = interaction.options.getNumber("amount")
 
     const subcommandHandlers = {
-        gems: () => gemsCommand(interaction, amount),
-        treasure: () => treasureCommand(interaction, amount),
-        cs: () => csCommand(interaction, amount),
+        gems: async () => await handleGemsConversion(interaction, amount),
+        treasure: async () =>
+            await handleTreasureConversion(interaction, amount),
+        cs: async () => await handleCSConversion(interaction, amount),
         progeny: async () => {
             const dragon1 = interaction.options.getNumber("dragon1")
             const dragon2 = interaction.options.getNumber("dragon2")

@@ -1,13 +1,9 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js"
-import { MongoClient } from "mongodb"
 
-import { DATABASE_CONFIG } from "../../config.js"
-
-const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI)
-const database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)
-const collection = database.collection(
-    DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND,
-)
+import {
+    removeAutoReminder,
+    setAutoReminder,
+} from "../../utils/autoremind.js"
 
 export const data = new SlashCommandBuilder()
     .setName("autoremind")
@@ -60,50 +56,34 @@ export async function execute(interaction) {
         await interaction.deferReply()
         const reminderType = interaction.options.getString("type")
         const minutes = interaction.options.getNumber("minutes")
-        const documentExists = await collection.findOne({
-            user_id: interaction.user.id.toString(),
-        })
 
-        if (documentExists) {
-            await collection.updateOne(
-                { user_id: interaction.user.id.toString() },
-                {
-                    $set: {
-                        [reminderType]: minutes,
-                        channel_id: interaction.channelId.toString(),
-                        server_id: interaction.guildId.toString(),
-                    },
-                },
-            )
-            await interaction.editReply(
-                `Your ${reminderType === "pound" ? "Pound" : "Lost and Found"} auto remind has been updated to ${minutes} minute(s) in channel <#${interaction.channelId}>.`,
-            )
-            return
-        }
-
-        await collection.insertOne({
-            server_id: interaction.guildId.toString(),
-            channel_id: interaction.channelId.toString(),
-            user_id: interaction.user.id.toString(),
-            pound: reminderType === "pound" ? minutes : 0,
-            laf: reminderType === "laf" ? minutes : 0,
-        })
-
-        await interaction.editReply(
-            `Your ${reminderType === "pound" ? "Pound" : "Lost and Found"} auto remind has been set to ${minutes} minute(s) in channel <#${interaction.channelId}>.`,
+        const success = await setAutoReminder(
+            interaction.user.id.toString(),
+            interaction.channelId.toString(),
+            interaction.guildId.toString(),
+            reminderType,
+            minutes,
         )
+
+        if (success) {
+            await interaction.editReply(
+                `Your ${reminderType === "pound" ? "Pound" : "Lost and Found"} auto remind has been set to ${minutes} minute(s) in channel <#${interaction.channelId}>.`,
+            )
+        } else {
+            await interaction.editReply(
+                "There was an error setting your auto reminder. Please try again later.",
+            )
+        }
     }
 
     if (subcommand === "remove") {
         const reminderType = interaction.options.getString("type")
-        const result = await collection.findOneAndUpdate(
-            { user_id: interaction.user.id.toString() },
-            { $set: { [reminderType]: 0 } },
-            { returnDocument: "before" },
+        const result = await removeAutoReminder(
+            interaction.user.id.toString(),
+            reminderType,
         )
-        const remind_time = result[reminderType]
 
-        if (remind_time === 0) {
+        if (!result.success || result.previousTime === 0) {
             await interaction.reply({
                 content:
                     "No reminder was found. Are you sure you have an Auto Remind set up?",
@@ -113,7 +93,7 @@ export async function execute(interaction) {
         }
 
         await interaction.reply(
-            `Your ${remind_time} minute(s) reminder for the ${reminderType === "pound" ? "Pound" : "Lost and Found"} has been removed.`,
+            `Your ${result.previousTime} minute(s) reminder for the ${reminderType === "pound" ? "Pound" : "Lost and Found"} has been removed.`,
         )
     }
 }
