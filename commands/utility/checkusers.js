@@ -2,7 +2,7 @@ import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 import { MongoClient } from "mongodb"
 
 import { DATABASE_CONFIG } from "../../config.js"
-import { Logger } from "../../logger.js"
+import { Logger } from "../../utils/logger.js"
 
 const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI)
 const database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)

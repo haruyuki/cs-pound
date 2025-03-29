@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js"
 
-import { ItemDB, PetDB } from "../../lib.js"
+import { ItemDB, PetDB } from "../../utils/lib.js"
 
 const MONTHS = [
     "January",

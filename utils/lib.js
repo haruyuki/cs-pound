@@ -11,7 +11,7 @@ import {
     COOKIE_FILE_PATH,
     CS_CONFIG,
     DATABASE_CONFIG,
-} from "./config.js"
+} from "../config.js"
 import { Logger } from "./logger.js"
 import { cookieJar, makeGETRequest, makePOSTRequest } from "./webrequests.js"
 

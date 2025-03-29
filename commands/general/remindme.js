@@ -1,7 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js"
 
-import { formatter } from "../../lib.js"
-import { Logger } from "../../logger.js"
+import { formatter } from "../../utils/lib.js"
+import { Logger } from "../../utils/logger.js"
 
 function parseTimeString(amount) {
     const times = { h: 0, m: 0, s: 0 }

@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { ActivityType, Client, Collection, GatewayIntentBits } from "discord.js"
 
 import { DISCORD_CONFIG } from "./config.js"
-import { Logger } from "./logger.js"
+import { Logger } from "./utils/logger.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

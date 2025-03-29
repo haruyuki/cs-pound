@@ -2,8 +2,8 @@ import { unlink } from "node:fs"
 import fetch from "node-fetch"
 import sharp from "sharp"
 
-import { Logger } from "../../logger.js"
-import { makeGETRequest, makePOSTRequest } from "../../webrequests.js"
+import { Logger } from "../../utils/logger.js"
+import { makeGETRequest, makePOSTRequest } from "../../utils/webrequests.js"
 import { ELEMENTS } from "./flightrising.js"
 
 export async function progenyCommand(interaction, dragon1, dragon2, element) {

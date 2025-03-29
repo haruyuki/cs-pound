@@ -6,7 +6,7 @@ import dotenv from "dotenv"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
 
-import { Logger } from "./logger.js"
+import { Logger } from "./utils/logger.js"
 
 dotenv.config()
 

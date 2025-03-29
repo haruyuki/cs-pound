@@ -5,7 +5,7 @@ import * as cheerio from "cheerio"
 import { CookieJar } from "tough-cookie"
 
 import { Cache } from "./cache.js"
-import { COOKIE_FILE_PATH, WEB_REQUEST_CONFIG } from "./config.js"
+import { COOKIE_FILE_PATH, WEB_REQUEST_CONFIG } from "../config.js"
 import { Logger } from "./logger.js"
 
 export const HEADERS = WEB_REQUEST_CONFIG.HEADERS

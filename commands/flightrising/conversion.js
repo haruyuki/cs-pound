@@ -1,5 +1,5 @@
-import { authenticate } from "../../lib.js"
-import { Logger } from "../../logger.js"
+import { authenticate } from "../../utils/lib.js"
+import { Logger } from "../../utils/logger.js"
 
 export async function gemsCommand(interaction, amount) {
     const [csExchangeRate, gemExchangeRate, treasureExchangeRate] =

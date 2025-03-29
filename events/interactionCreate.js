@@ -1,6 +1,6 @@
 import { Events, MessageFlags } from "discord.js"
 
-import { Logger } from "../logger.js"
+import { Logger } from "../utils/logger.js"
 
 export const name = Events.InteractionCreate
 

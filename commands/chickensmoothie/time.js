@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js"
 
-import { getOpeningTime } from "../../lib.js"
+import { getOpeningTime } from "../../utils/lib.js"
 
 export const data = new SlashCommandBuilder()
     .setName("time")

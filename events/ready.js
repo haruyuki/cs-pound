@@ -6,8 +6,8 @@ import {
     PetDB,
     sequelize,
     updateAutoRemindTimes,
-} from "../lib.js"
-import { Logger } from "../logger.js"
+} from "../utils/lib.js"
+import { Logger } from "../utils/logger.js"
 import { openingCountdown } from "../tasks/openingCountdown.js"
 
 export const name = Events.ClientReady

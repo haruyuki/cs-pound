@@ -7,8 +7,8 @@ import {
     LAF_REMIND_TIMES,
     POUND_REMIND_TIMES,
     updateAutoRemindTimes,
-} from "../lib.js"
-import { Logger } from "../logger.js"
+} from "../utils/lib.js"
+import { Logger } from "../utils/logger.js"
 
 let lessThanOneHourRemaining = false
 let timeoutTime = 60

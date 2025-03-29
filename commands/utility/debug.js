@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 
-import { Logger } from "../../logger.js"
+import { Logger } from "../../utils/logger.js"
 
 export const data = new SlashCommandBuilder()
     .setName("debug")
