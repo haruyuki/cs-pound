@@ -103,7 +103,7 @@ export const TASK_CONFIG = {
 
 // Discord settings
 export const DISCORD_CONFIG = {
-    TOKEN: process.env.DISCORD_TOKEN_DEV,
+    TOKEN: process.env.DISCORD_TOKEN,
     INTENTS: ["Guilds"],
     PRESENCE: {
         ACTIVITY_TYPE: "Playing",
