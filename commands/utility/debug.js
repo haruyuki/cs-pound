@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 
 import { Logger } from "../../utils/logger.js"
 
@@ -26,6 +26,6 @@ export async function execute(interaction) {
     // Reply with the current debug mode status
     await interaction.reply({
         content: `Debug mode is now ${state ? "enabled" : "disabled"}.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
     })
 }
