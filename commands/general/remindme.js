@@ -1,39 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js"
 
 import { Logger } from "../../utils/logger.js"
-import { formatter } from "../../utils/utils.js"
-
-function parseTimeString(amount) {
-    const times = { h: 0, m: 0, s: 0 }
-
-    if (/^\d+$/.test(amount)) {
-        times.m = parseInt(amount, 10)
-    } else {
-        if (!/^\d+[hms](\d+[hms])*$/.test(amount)) {
-            return [0, 0, 0]
-        }
-
-        const matches = amount.match(/(\d+)([hms])/g) || []
-
-        matches.forEach((match) => {
-            const value = parseInt(match.slice(0, -1), 10)
-            const unit = match.slice(-1)
-            times[unit] = value
-        })
-    }
-
-    if (times.s >= 60) {
-        times.m += Math.floor(times.s / 60)
-        times.s = times.s % 60
-    }
-
-    if (times.m >= 60) {
-        times.h += Math.floor(times.m / 60)
-        times.m = times.m % 60
-    }
-
-    return [times.h, times.m, times.s]
-}
+import { formatter, parseTimeString } from "../../utils/utils.js"
 
 export const data = new SlashCommandBuilder()
     .setName("remindme")
