@@ -1,4 +1,4 @@
-import { ItemDB, PetDB } from "../database/database.js"
+import { ItemDB, PetDB } from "../database/sqlite.js"
 
 // Constants used for identification
 const MONTHS = [
