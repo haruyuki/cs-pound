@@ -8,9 +8,13 @@
  * @returns {string} Formatted time string
  */
 export function formatter([h, m, s]) {
-    return [
-        h ? `${h} hour${h > 1 ? "s" : ""}${m || s ? ", " : ""}` : "",
-        m ? `${m} minute${m > 1 ? "s" : ""}${s ? " and " : ""}` : "",
-        s ? `${h || m ? "and " : ""}${s} second${s > 1 ? "s" : ""}` : "",
-    ].join("")
+    const parts = [
+        h && `${h} hour${h > 1 ? "s" : ""}`,
+        m && `${m} minute${m > 1 ? "s" : ""}`,
+        s && `${s} second${s > 1 ? "s" : ""}`,
+    ].filter(Boolean)
+
+    return parts
+        .join(parts.length > 1 ? ", " : "")
+        .replace(/,([^,]*)$/, " and$1")
 }
