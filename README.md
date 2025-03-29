@@ -2,6 +2,7 @@
 
 [![discord.js](https://img.shields.io/badge/discord.js-14.16.3-blue.svg)](https://github.com/discordjs/discord.js)
 [![Node 22.9.0](https://img.shields.io/badge/node-22.9.0-green.svg)](https://nodejs.org/en)
+[![codecov](https://codecov.io/github/haruyuki/cs-pound/graph/badge.svg?token=PZ9oAvUEDY)](https://codecov.io/github/haruyuki/cs-pound)
 [![License](https://img.shields.io/github/license/haruyuki/cs-pound-js.svg)](https://github.com/haruyuki/cs-pound-js/blob/master/COPYING)
 
 A Discord bot for the virtual pet adoption website [Chicken Smoothie](https://www.chickensmoothie.com). With this bot you can view information on pets and pound opening times straight from Discord without accessing the website.
