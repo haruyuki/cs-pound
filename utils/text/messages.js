@@ -25,7 +25,7 @@ export function formatOpeningTime(openingType, timeRemaining) {
         } else {
             result += `The ${openingType} will open in: ${minutes} ${minutes > 1 ? "minutes" : "minute"}.`
         }
-    } else {
+    } else if (hours > 0) {
         result += "."
     }
 

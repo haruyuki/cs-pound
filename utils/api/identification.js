@@ -119,9 +119,15 @@ export async function identifyPet(link) {
  * @returns {boolean} True if the link is valid, false otherwise
  */
 export function isValidChickenSmoothieLink(link) {
-    return (
-        link.includes("chickensmoothie.com") || link.includes("chickencdn.com")
-    )
+    try {
+        const url = new URL(link)
+        const hostname = url.hostname.replace(/^www\./, "")
+        return (
+            hostname === "chickensmoothie.com" || hostname === "chickencdn.com"
+        )
+    } catch (error) {
+        return false
+    }
 }
 
 /**

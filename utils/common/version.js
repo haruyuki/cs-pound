@@ -20,19 +20,19 @@ export function getVersionFromGit() {
         // Get the latest commit hash
         const commitHash = execSync("git log -1 --format=%h").toString().trim()
 
-        // Parse the date
+        // Parse the date in UTC to avoid timezone issues
         const date = new Date(commitDate)
 
-        // Format as YYYY.MM.DD (Git hash)
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, "0")
-        const day = String(date.getDate()).padStart(2, "0")
+        // Format as YYYY.MM.DD (Git hash) using UTC methods to ensure consistency
+        const year = date.getUTCFullYear()
+        const month = String(date.getUTCMonth() + 1).padStart(2, "0")
+        const day = String(date.getUTCDate()).padStart(2, "0")
 
         return `${year}.${month}.${day} (${commitHash})`
     } catch (error) {
-        // Fallback to a default version if Git command fails
-        console.error("Failed to get version from Git:", error.message)
-        return "0000.00.00"
+        // Log the error but re-throw it so getVersion can handle it
+        Logger.error("Failed to get version from Git:", error.message)
+        throw error
     }
 }
 

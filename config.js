@@ -5,7 +5,7 @@ import { getVersion } from "./utils/common/version.js"
 dotenv.config()
 
 // Bot information
-export const BOT_VERSION = getVersion()
+export const BOT_VERSION = getVersion("2025.03.30")
 
 // File paths
 export const COOKIE_FILE_PATH = "./cookies.json"
