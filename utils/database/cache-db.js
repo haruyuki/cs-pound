@@ -1,4 +1,4 @@
-import Sequelize from "sequelize"
+import Sequelize, { NUMBER, STRING, TEXT } from "sequelize"
 
 import { DATABASE_CONFIG } from "../../config.js"
 
@@ -26,3 +26,26 @@ export const cacheSequelize = new Sequelize({
         },
     },
 })
+
+// Define Cache model
+export const CacheStore = cacheSequelize.define(
+    "Cache",
+    {
+        key: {
+            type: STRING,
+            primaryKey: true,
+        },
+        value: {
+            type: TEXT,
+            allowNull: false,
+        },
+        expiresAt: {
+            type: NUMBER,
+            allowNull: false,
+        },
+    },
+    {
+        freezeTableName: true,
+        timestamps: false,
+    },
+)

@@ -1,6 +1,6 @@
-import { Model as CacheStore, NUMBER, STRING, TEXT } from "sequelize"
+import { Sequelize } from "sequelize"
 
-import { cacheSequelize } from "../database/cache-db.js"
+import { CacheStore } from "../database/cache-db.js"
 
 /**
  * SQLite-based cache implementation with TTL support
@@ -97,11 +97,10 @@ export class SQLiteCache {
      * @returns {Promise<number>} The number of items removed
      */
     async cleanup() {
-        const result = await CacheStore.destroy({
+        return await CacheStore.destroy({
             where: {
-                expiresAt: { [sequelize.Op.lt]: Date.now() },
+                expiresAt: { [Sequelize.Op.lt]: Date.now() },
             },
         })
-        return result
     }
 }
