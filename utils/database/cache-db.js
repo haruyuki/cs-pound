@@ -1,4 +1,4 @@
-import Sequelize, { NUMBER, STRING, TEXT } from "sequelize"
+import Sequelize, { DataTypes } from "sequelize"
 
 import { DATABASE_CONFIG } from "../../config.js"
 
@@ -32,15 +32,15 @@ export const CacheStore = cacheSequelize.define(
     "Cache",
     {
         key: {
-            type: STRING,
+            type: DataTypes.STRING,
             primaryKey: true,
         },
         value: {
-            type: TEXT,
+            type: DataTypes.TEXT,
             allowNull: false,
         },
         expiresAt: {
-            type: NUMBER,
+            type: DataTypes.BIGINT,
             allowNull: false,
         },
     },

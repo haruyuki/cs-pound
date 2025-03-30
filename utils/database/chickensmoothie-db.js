@@ -1,4 +1,4 @@
-import Sequelize, { NUMBER, STRING } from "sequelize"
+import Sequelize, { DataTypes } from "sequelize"
 
 import { DATABASE_CONFIG } from "../../config.js"
 
@@ -33,13 +33,13 @@ export const PetDB = sequelize.define(
     "ChickenSmoothiePetArchive",
     {
         petID: {
-            type: STRING,
+            type: DataTypes.STRING,
             unique: true,
             primaryKey: true,
         },
-        petYear: NUMBER,
-        petEvent: STRING,
-        petLink: STRING,
+        petYear: DataTypes.NUMBER,
+        petEvent: DataTypes.STRING,
+        petLink: DataTypes.STRING,
     },
     {
         freezeTableName: true,
@@ -51,18 +51,18 @@ export const ItemDB = sequelize.define(
     "ChickenSmoothieItemArchive",
     {
         itemLID: {
-            type: STRING,
+            type: DataTypes.STRING,
             unique: true,
             primaryKey: true,
         },
         itemRID: {
-            type: STRING,
+            type: DataTypes.STRING,
             unique: true,
         },
-        itemName: STRING,
-        itemYear: NUMBER,
-        itemEvent: STRING,
-        itemLink: STRING,
+        itemName: DataTypes.STRING,
+        itemYear: DataTypes.NUMBER,
+        itemEvent: DataTypes.STRING,
+        itemLink: DataTypes.STRING,
     },
     {
         freezeTableName: true,
