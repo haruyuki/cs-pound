@@ -74,9 +74,22 @@ export async function makeGETRequest(
         const cacheKey = `GET:${url}`
 
         // Check if caching is enabled and if the response is in cache
-        if (cacheOptions.use && requestCache[cacheOptions.type].has(cacheKey)) {
+        if (
+            cacheOptions.use &&
+            (await requestCache[cacheOptions.type].has(cacheKey))
+        ) {
             Logger.debug(`Cache hit for ${url}`)
-            return requestCache[cacheOptions.type].get(cacheKey)
+            const cached = await requestCache[cacheOptions.type].get(cacheKey)
+            if (typeof cached === "string") {
+                // Handle cached HTML strings by converting back to cheerio object
+                return cheerio.load(cached)
+            } else if (typeof cached !== "function") {
+                Logger.debug(
+                    `Invalid cache entry for ${url}, making new request`,
+                )
+            } else {
+                return cached
+            }
         }
 
         Logger.debug(`Making GET request to ${url}`)
@@ -91,7 +104,8 @@ export async function makeGETRequest(
 
         // Cache the response if caching is enabled
         if (cacheOptions.use) {
-            requestCache[cacheOptions.type].set(cacheKey, $)
+            await requestCache[cacheOptions.type].set(cacheKey, $.html())
+            Logger.debug(`Cached response for ${url}`)
         }
 
         return $
@@ -128,9 +142,12 @@ export async function makePOSTRequest(
             : null
 
         // Check cache if enabled
-        if (cacheOptions.use && requestCache[cacheOptions.type].has(cacheKey)) {
+        if (
+            cacheOptions.use &&
+            (await requestCache[cacheOptions.type].has(cacheKey))
+        ) {
             Logger.debug(`Cache hit for POST ${url}`)
-            return requestCache[cacheOptions.type].get(cacheKey)
+            return await requestCache[cacheOptions.type].get(cacheKey)
         }
 
         // Create appropriate client based on stateless flag
@@ -165,7 +182,7 @@ export async function makePOSTRequest(
 
         // Cache the response if caching is enabled
         if (cacheOptions.use) {
-            requestCache[cacheOptions.type].set(cacheKey, result)
+            await requestCache[cacheOptions.type].set(cacheKey, result)
         }
 
         return result

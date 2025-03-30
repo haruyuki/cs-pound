@@ -6,6 +6,6 @@ CREATE TABLE "Cache" (
 )
 
 Example:
-key: "user_123_pets"
-value: "{\"pets\":[...]}"
-expiresAt: 1704067200000
+key: "GET:https://www.chickensmoothie.com/archive/2018/"
+value: "<!DOCTYPE html><html dir=\"ltr\" lang=\"en-gb\"><head>\n\n<meta http-equiv=\"content-type\"..."
+expiresAt: 1743354156027
