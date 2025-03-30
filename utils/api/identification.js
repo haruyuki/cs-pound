@@ -123,7 +123,9 @@ export function isValidChickenSmoothieLink(link) {
         const url = new URL(link)
         const hostname = url.hostname.replace(/^www\./, "")
         return (
-            hostname === "chickensmoothie.com" || hostname === "chickencdn.com" || hostname === "static.chickensmoothie.com"
+            hostname === "chickensmoothie.com" ||
+            hostname === "chickencdn.com" ||
+            hostname === "static.chickensmoothie.com"
         )
     } catch (error) {
         return false
