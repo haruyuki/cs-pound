@@ -49,7 +49,12 @@ export class SQLiteCache {
             return null
         }
 
-        return JSON.parse(item.value)
+        const parsedValue = JSON.parse(item.value)
+        if (parsedValue === null) {
+            await this.delete(key)
+            return null
+        }
+        return parsedValue
     }
 
     /**
