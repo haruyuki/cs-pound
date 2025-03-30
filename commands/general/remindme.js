@@ -1,7 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js"
 
 import { Logger } from "../../utils/common/logger.js"
-import { formatter, parseTimeString } from "../../utils/time/utils.js"
+import { formatter, parseTimeString } from "../../utils/text/time.js"
 
 export const data = new SlashCommandBuilder()
     .setName("remindme")

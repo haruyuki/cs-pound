@@ -2,7 +2,7 @@ import { performance } from "node:perf_hooks"
 
 import { CS_CONFIG } from "../../config.js"
 import { Logger } from "../common/logger.js"
-import { formatOpeningTime, formatOpenMessage } from "../time/time-utils.js"
+import { formatOpeningTime, formatOpenMessage } from "../text/messages.js"
 import { login } from "./auth.js"
 import { makeGETRequest } from "./webrequests.js"
 
