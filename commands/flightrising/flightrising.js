@@ -6,7 +6,7 @@ import {
     handleGemsConversion,
     handleTreasureConversion,
 } from "../../utils/common/conversion.js"
-import { progenyCommand } from "./progeny.js"
+import { handleProgeny } from "../../utils/api/progeny.js"
 
 export const data = new SlashCommandBuilder()
     .setName("flightrising")
@@ -86,10 +86,11 @@ export async function execute(interaction) {
             await handleTreasureConversion(interaction, amount),
         cs: async () => await handleCSConversion(interaction, amount),
         progeny: async () => {
+            await interaction.deferReply()
             const dragon1 = interaction.options.getNumber("dragon1")
             const dragon2 = interaction.options.getNumber("dragon2")
             const element = interaction.options.getNumber("element")
-            await progenyCommand(interaction, dragon1, dragon2, element)
+            await handleProgeny(interaction, dragon1, dragon2, element)
         },
     }
 
