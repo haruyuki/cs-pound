@@ -175,5 +175,7 @@ dist
 .DS_Store
 
 # Custom
-config.json
+cookies.json
+coverage/
 chickensmoothie.db
+cache.db

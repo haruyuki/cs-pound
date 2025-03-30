@@ -12,14 +12,18 @@ export const COOKIE_FILE_PATH = "./cookies.json"
 
 // Web request settings
 export const WEB_REQUEST_CONFIG = {
-    // Cache TTLs (in milliseconds)
-    CACHE_TTL: {
-        // 1 minute
-        SHORT: 60000,
-        // 5 minutes
-        GENERAL: 300000,
-        // 30 minutes
-        STATIC: 1800000,
+    // Cache configuration
+    CACHE: {
+        TYPE: "memory",
+        // Cache TTLs (in milliseconds)
+        TTL: {
+            // 1 minute
+            SHORT: 60000,
+            // 5 minutes
+            GENERAL: 300000,
+            // 1 hour
+            STATIC: 3600000,
+        },
     },
     // Connection pooling settings
     CONNECTION_POOL: {
@@ -70,6 +74,21 @@ export const DATABASE_CONFIG = {
             // Write-Ahead Logging
             JOURNAL_MODE: "WAL",
             // Normal synchronization
+            SYNCHRONOUS: 1,
+        },
+    },
+    // Cache database settings
+    CACHE_DB: {
+        FILENAME: "cache.db",
+        POOL: {
+            MAX: 5,
+            MIN: 0,
+            ACQUIRE: 30000,
+            IDLE: 10000,
+        },
+        PRAGMA: {
+            CACHE_SIZE: -1024 * 64,
+            JOURNAL_MODE: "WAL",
             SYNCHRONOUS: 1,
         },
     },

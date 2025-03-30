@@ -20,10 +20,8 @@ export const getOpeningTime = async () => {
     try {
         const startTime = performance.now()
 
-        const cacheOptions = { use: false, type: "short" }
-
         // Make the request to the URL using axiosClient and the existing cookie jar
-        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_LAF, cacheOptions)
+        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_LAF, { use: false })
 
         // Extract the last <h2> element's text content
         const text = $("h2:last-of-type").text().trim()
@@ -89,7 +87,10 @@ export const getRarePoundPets = async () => {
 
     try {
         // Fetch the pound page HTML using axiosClient
-        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_GROUP)
+        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_GROUP, {
+            use: true,
+            type: "static",
+        })
         const allPets = []
 
         // Loop through all pets and extract rare pets

@@ -1,10 +1,16 @@
 import { Events } from "discord.js"
 
 import { BOT_VERSION } from "../config.js"
+import { setupAutomaticCleanup } from "../tasks/cacheCleanup.js"
 import { openingCountdown } from "../tasks/openingCountdown.js"
 import { login } from "../utils/api/auth.js"
+import { CacheType } from "../utils/cache/singleton.js"
 import { Logger } from "../utils/common/logger.js"
-import { ItemDB, PetDB, sequelize } from "../utils/database/chickensmoothie-db.js"
+import {
+    ItemDB,
+    PetDB,
+    sequelize,
+} from "../utils/database/chickensmoothie-db.js"
 import { updateAutoRemindTimes } from "../utils/database/mongo-db.js"
 
 export const name = Events.ClientReady
@@ -34,7 +40,11 @@ export async function execute(client) {
     Logger.info("Running openingCountdown background task...")
     await openingCountdown(client)
 
-    Logger.info(
+    Logger.info("Running cacheCleanup background task...")
+    setupAutomaticCleanup(CacheType.MEMORY)
+    setupAutomaticCleanup(CacheType.SQLITE)
+
+    Logger.success(
         `Ready! Logged in as ${client.user.tag} running version ${BOT_VERSION}`,
     )
 }

@@ -1,0 +1,11 @@
+CREATE TABLE "Cache" (
+	"key"	TEXT,
+	"value"	TEXT,
+	"expiresAt"	INTEGER,
+	PRIMARY KEY("key")
+)
+
+Example:
+key: "user_123_pets"
+value: "{\"pets\":[...]}"
+expiresAt: 1704067200000

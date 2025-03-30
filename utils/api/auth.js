@@ -28,7 +28,10 @@ function saveCookiesToFile(jar, filepath) {
  */
 const attemptLogin = async (captchaSolution = null) => {
     try {
-        const $ = await makeGETRequest(CS_CONFIG.URLS.LOGIN)
+        const $ = await makeGETRequest(CS_CONFIG.URLS.LOGIN, {
+            use: true,
+            type: "short",
+        })
 
         const csrfToken = $('input[name="csrf_token"]').val()
         const payload = new URLSearchParams()

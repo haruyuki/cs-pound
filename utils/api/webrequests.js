@@ -5,7 +5,7 @@ import * as cheerio from "cheerio"
 import { CookieJar } from "tough-cookie"
 
 import { COOKIE_FILE_PATH, WEB_REQUEST_CONFIG } from "../../config.js"
-import { Cache } from "../common/cache.js"
+import { createCache } from "../cache/singleton.js"
 import { Logger } from "../common/logger.js"
 
 export const HEADERS = WEB_REQUEST_CONFIG.HEADERS
@@ -15,11 +15,11 @@ export const cookieJar = loadCookiesFromFile(COOKIE_FILE_PATH)
 // Create request cache with different TTLs for different types of requests
 export const requestCache = {
     // General cache for most requests (5 minutes TTL)
-    general: new Cache(300000),
+    general: createCache(WEB_REQUEST_CONFIG.CACHE.TTL.GENERAL),
     // Short-lived cache for frequently changing data (1 minute TTL)
-    short: new Cache(60000),
-    // Long-lived cache for static content (30 minutes TTL)
-    static: new Cache(1800000),
+    short: createCache(WEB_REQUEST_CONFIG.CACHE.TTL.SHORT),
+    // Long-lived cache for static content (60 minutes TTL)
+    static: createCache(WEB_REQUEST_CONFIG.CACHE.TTL.STATIC),
 }
 
 // Configure axios with connection pooling

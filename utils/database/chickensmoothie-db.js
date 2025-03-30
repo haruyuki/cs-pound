@@ -21,7 +21,8 @@ export const sequelize = new Sequelize({
         // SQLite specific options
         pragma: {
             cache_size: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.CACHE_SIZE,
-            journal_mode: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.JOURNAL_MODE,
+            journal_mode:
+                DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.JOURNAL_MODE,
             synchronous: DATABASE_CONFIG.CHICKENSMOOTHIE_DB.PRAGMA.SYNCHRONOUS,
         },
     },

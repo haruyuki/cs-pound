@@ -1,7 +1,7 @@
 /**
  * Simple in-memory cache implementation with TTL support
  */
-export class Cache {
+export class MemoryCache {
     constructor(defaultTTL = 300000) {
         // Default TTL: 5 minutes (in milliseconds)
         this.cache = new Map()
