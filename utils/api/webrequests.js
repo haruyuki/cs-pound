@@ -46,7 +46,7 @@ const axiosClient = wrapper(
  * @param {string} filepath - Path to the cookie file
  * @returns {CookieJar} The loaded cookie jar or a new one if file doesn't exist
  */
-function loadCookiesFromFile(filepath) {
+export function loadCookiesFromFile(filepath) {
     Logger.debug("Loading cookies from file...")
     if (existsSync(filepath)) {
         const serializedCookies = readFileSync(filepath, "utf-8")

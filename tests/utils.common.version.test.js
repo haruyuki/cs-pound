@@ -8,12 +8,8 @@ jest.mock("child_process", () => ({
     execSync: jest.fn(),
 }))
 
-// Mock Logger
-jest.mock("../utils/common/logger.js", () => ({
-    Logger: {
-        error: jest.fn(),
-    },
-}))
+// Use global mock for Logger
+jest.mock("../utils/common/logger.js")
 
 describe("getVersionFromGit", () => {
     beforeEach(() => {

@@ -71,7 +71,7 @@ export const getOpeningTime = async () => {
         // Return null if no match found
         return null
     } catch (error) {
-        console.error("Error while getting opening time:", error.message)
+        Logger.error("Error while getting opening time:", error.message)
         return null
     }
 }
