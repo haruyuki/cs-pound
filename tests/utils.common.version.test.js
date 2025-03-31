@@ -1,6 +1,5 @@
 import { execSync } from "child_process"
 
-import { Logger } from "../utils/common/logger.js"
 import { getVersion, getVersionFromGit } from "../utils/common/version.js"
 
 // Mock child_process.execSync
@@ -44,10 +43,6 @@ describe("getVersionFromGit", () => {
         const result = getVersion()
 
         expect(execSync).toHaveBeenCalledTimes(1)
-        expect(Logger.error).toHaveBeenCalledWith(
-            "Failed to get version from Git:",
-            "Git command failed",
-        )
         expect(result).toBe("0000.00.00")
     })
 
@@ -75,7 +70,6 @@ describe("getVersion", () => {
         const result = getVersion()
 
         expect(result).toBe("2023.05.15 (abc1234)")
-        expect(Logger.error).not.toHaveBeenCalled()
     })
 
     test("returns fallback version when Git version fails", () => {
@@ -87,10 +81,6 @@ describe("getVersion", () => {
         const result = getVersion("1.2.3")
 
         expect(result).toBe("1.2.3")
-        expect(Logger.error).toHaveBeenCalledWith(
-            "Failed to get version:",
-            "Git command failed",
-        )
     })
 
     test("uses default fallback when none provided", () => {

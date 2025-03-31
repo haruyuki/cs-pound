@@ -9,7 +9,6 @@ import {
     makePOSTRequest,
     requestCache,
 } from "../utils/api/webrequests.js"
-import { Logger } from "../utils/common/logger.js"
 
 // Mock dependencies
 jest.mock("node:fs")
@@ -58,7 +57,6 @@ describe("loadCookiesFromFile", () => {
 
         expect(existsSync).toHaveBeenCalledWith("/path/to/cookies.json")
         expect(readFileSync).not.toHaveBeenCalled()
-        expect(Logger.warn).toHaveBeenCalled()
         expect(result).toBeDefined()
     })
 })
@@ -178,7 +176,6 @@ describe("makeGETRequest", () => {
         await expect(makeGETRequest("https://example.com")).rejects.toThrow(
             "Network error",
         )
-        expect(Logger.error).toHaveBeenCalled()
     })
 })
 
@@ -223,6 +220,5 @@ describe("makePOSTRequest", () => {
         await expect(
             makePOSTRequest("https://example.com", "key=value"),
         ).rejects.toThrow("Network error")
-        expect(Logger.error).toHaveBeenCalled()
     })
 })

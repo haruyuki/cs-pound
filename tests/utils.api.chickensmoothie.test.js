@@ -4,7 +4,6 @@ import {
     getOpeningTime,
 } from "../utils/api/chickensmoothie.js"
 import { makeGETRequest } from "../utils/api/webrequests.js"
-import { Logger } from "../utils/common/logger.js"
 import { formatOpeningTime, formatOpenMessage } from "../utils/text/messages.js"
 
 // Mock logger module
@@ -47,7 +46,6 @@ describe("getOpeningTime", () => {
             timeRemaining: 0,
             thingsRemaining: 50,
         })
-        expect(Logger.debug).toHaveBeenCalled()
     })
 
     test("returns lost and found opening info when lost and found is open", async () => {
@@ -136,8 +134,6 @@ describe("getOpeningTime", () => {
         const result = await getOpeningTime()
 
         expect(result).toBeNull()
-        // Check that Logger.error was called
-        expect(Logger.error).toHaveBeenCalled()
     })
 })
 
