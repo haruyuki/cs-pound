@@ -13,8 +13,15 @@ import { delay } from "../../utils/common/delay.js"
 import { Logger } from "../../utils/common/logger.js"
 
 // Regex pattern to identify monthly events (excluding April Fool's which is considered special)
-const MONTHLY_EVENT_PATTERN = /^(January|February|March|April|May|June|July|August|September|October|November|December)/
+const MONTHLY_EVENT_PATTERN =
+    /^(January|February|March|April|May|June|July|August|September|October|November|December)/
 const APRIL_FOOLS_PATTERN = /^April Fool's/
+
+// Field names for consistency
+const FIELD_NAMES = {
+    MONTHLY: "Monthly Events",
+    SPECIAL: "Special Events",
+}
 
 export const data = new SlashCommandBuilder()
     .setName("updatedb")
@@ -36,6 +43,53 @@ export const data = new SlashCommandBuilder()
             ),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+
+/**
+ * Helper function to determine if an event is a monthly event
+ * @param {string} eventTitle - The title of the event
+ * @returns {boolean} - Whether the event is a monthly event
+ */
+function isMonthlyEventType(eventTitle) {
+    return (
+        MONTHLY_EVENT_PATTERN.test(eventTitle) &&
+        !APRIL_FOOLS_PATTERN.test(eventTitle)
+    )
+}
+
+/**
+ * Helper function to get the event title from a link
+ * @param {string} link - The link to extract the title from
+ * @param {string} type - The type of event ("pets" or "items")
+ * @returns {string} - The extracted event title
+ */
+function getEventTitleFromLink(link, type) {
+    return type === "pets" ? link.slice(14, -1) : link.slice(14, -7)
+}
+
+/**
+ * Helper function to update the embed field for a category of events
+ * @param {EmbedBuilder} embed - The embed to update
+ * @param {Array} events - The events in the category
+ * @param {number} fieldIndex - The index of the field to update
+ * @param {string} fieldName - The name of the field
+ */
+function updateEmbedField(embed, events, fieldIndex, fieldName) {
+    const updatedValue =
+        events.length > 0
+            ? events
+                .map(
+                    (event, idx) =>
+                        `${idx + 1}. ${event.title}: ${event.status || "⏳ Pending"}`,
+                )
+                .join("\n")
+            : `No ${fieldName.toLowerCase()} found.`
+
+    embed.spliceFields(fieldIndex, 1, {
+        name: fieldName,
+        value: updatedValue,
+        inline: false,
+    })
+}
 
 export async function execute(interaction) {
     const year = interaction.options.getNumber("year")
@@ -79,8 +133,7 @@ export async function execute(interaction) {
         for (const event of eventLinks) {
             const link = decodeURIComponent(event.replace(/\?.*$/, ""))
             const baseLink = `https://www.chickensmoothie.com${encodeURI(link)}`
-            const eventTitle =
-                type === "pets" ? link.slice(14, -1) : link.slice(14, -7)
+            const eventTitle = getEventTitleFromLink(link, type)
 
             Logger.debug(
                 `Adding event to tracking: ${eventTitle} (${baseLink})`,
@@ -103,17 +156,11 @@ export async function execute(interaction) {
 
         // Group events into Monthly and Special categories
         const monthlyEvents = eventStatuses
-            .filter(
-                (event) =>
-                    MONTHLY_EVENT_PATTERN.test(event.title) && !APRIL_FOOLS_PATTERN.test(event.title),
-            )
+            .filter((event) => isMonthlyEventType(event.title))
             .map((event) => ({ ...event, status: "⏳ Pending" }))
 
         const specialEvents = eventStatuses
-            .filter(
-                (event) =>
-                    !MONTHLY_EVENT_PATTERN.test(event.title) || APRIL_FOOLS_PATTERN.test(event.title),
-            )
+            .filter((event) => !isMonthlyEventType(event.title))
             .map((event) => ({ ...event, status: "⏳ Pending" }))
 
         Logger.debug(
@@ -122,7 +169,7 @@ export async function execute(interaction) {
 
         // Add fields for Monthly and Special events
         progressEmbed.addFields({
-            name: "Monthly",
+            name: FIELD_NAMES.MONTHLY,
             value:
                 monthlyEvents.length > 0
                     ? monthlyEvents
@@ -136,7 +183,7 @@ export async function execute(interaction) {
         })
 
         progressEmbed.addFields({
-            name: "Special",
+            name: FIELD_NAMES.SPECIAL,
             value:
                 specialEvents.length > 0
                     ? specialEvents
@@ -158,6 +205,7 @@ export async function execute(interaction) {
             const event = eventLinks[i]
             const link = decodeURIComponent(event.replace(/\?.*$/, ""))
             const baseLink = `https://www.chickensmoothie.com${encodeURI(link)}`
+            const eventTitle = getEventTitleFromLink(link, type)
 
             Logger.debug(
                 `Processing event ${i + 1}/${eventLinks.length}: ${link}`,
@@ -176,9 +224,6 @@ export async function execute(interaction) {
             })
             Logger.debug(`Received response for ${allDataLink}`)
 
-            const eventTitle =
-                type === "pets" ? link.slice(14, -1) : link.slice(14, -7)
-
             // Count the number of data groups instead of pagination links
             // This is an optimization: instead of making multiple requests for each page,
             // we make a single request with pageSize=3000 and process all data groups
@@ -195,31 +240,18 @@ export async function execute(interaction) {
             eventStatuses[i].pages = dataGroups
 
             // Determine if this is a monthly or special event
-            let isMonthlyEvent = MONTHLY_EVENT_PATTERN.test(eventTitle) && !APRIL_FOOLS_PATTERN.test(eventTitle)
+            const isMonthlyEvent = isMonthlyEventType(eventTitle)
             // 0 for Monthly, 1 for Special
-            let fieldIndex = isMonthlyEvent ? 0 : 1
-
-            // Update the event status in the appropriate field
-            let events = isMonthlyEvent ? monthlyEvents : specialEvents
-            let eventIndex = events.findIndex((e) => e.title === eventTitle)
+            const fieldIndex = isMonthlyEvent ? 0 : 1
+            const fieldName = isMonthlyEvent
+                ? FIELD_NAMES.MONTHLY
+                : FIELD_NAMES.SPECIAL
+            const events = isMonthlyEvent ? monthlyEvents : specialEvents
+            const eventIndex = events.findIndex((e) => e.title === eventTitle)
 
             if (eventIndex !== -1) {
                 events[eventIndex].status = "🔄 Processing..."
-
-                // Update the field value with all events in this category
-                const updatedValue = events
-                    .map(
-                        (eventField, idx) =>
-                            `${idx + 1}. ${eventField.title}: ${eventField.status || "⏳ Pending"}`,
-                    )
-                    .join("\n")
-
-                progressEmbed.spliceFields(fieldIndex, 1, {
-                    name: isMonthlyEvent ? "Monthly Events" : "Special Events",
-                    value: updatedValue,
-                    inline: false,
-                })
-
+                updateEmbedField(progressEmbed, events, fieldIndex, fieldName)
                 await interaction.editReply({ embeds: [progressEmbed] })
             }
 
@@ -266,33 +298,11 @@ export async function execute(interaction) {
             // Mark event as completed
             eventStatuses[i].completed = true
 
-            // Update the event status in the appropriate field
-            // Reuse the same variables from earlier in the loop to avoid redeclaration
-            isMonthlyEvent =
-                MONTHLY_EVENT_PATTERN.test(eventTitle) && !APRIL_FOOLS_PATTERN.test(eventTitle)
-            // 0 for Monthly, 1 for Special
-            fieldIndex = isMonthlyEvent ? 0 : 1
-            events = isMonthlyEvent ? monthlyEvents : specialEvents
-            eventIndex = events.findIndex((e) => e.title === eventTitle)
-
             if (eventIndex !== -1) {
                 events[eventIndex].status =
-                    `✅ Completed - ${dataGroups} ${type}${type > 1 ? "s" : ""} groups processed (Added ${addedStats} ${type})`
+                    `✅ Completed - ${dataGroups} ${type} groups processed (Added ${addedStats} ${type})`
 
-                // Update the field value with all events in this category
-                const updatedValue = events
-                    .map(
-                        (eventField, idx) =>
-                            `${idx + 1}. ${eventField.title}: ${eventField.status || "⏳ Pending"}`,
-                    )
-                    .join("\n")
-
-                progressEmbed.spliceFields(fieldIndex, 1, {
-                    name: isMonthlyEvent ? "Monthly Events" : "Special Events",
-                    value: updatedValue,
-                    inline: false,
-                })
-
+                updateEmbedField(progressEmbed, events, fieldIndex, fieldName)
                 Logger.debug(
                     `Updated progress embed for event ${i + 1}/${eventLinks.length}`,
                 )
