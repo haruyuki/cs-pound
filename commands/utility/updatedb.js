@@ -6,18 +6,15 @@ import {
 
 import {
     fetchEventLinks,
+    getEventTitleFromLink,
+    isMonthlyEventType,
     processPage,
+    updateEmbedField,
 } from "../../utils/api/chickensmoothie-archive.js"
 import { makeGETRequest } from "../../utils/api/webrequests.js"
 import { delay } from "../../utils/common/delay.js"
 import { Logger } from "../../utils/common/logger.js"
 
-// Regex pattern to identify monthly events (excluding April Fool's which is considered special)
-const MONTHLY_EVENT_PATTERN =
-    /^(January|February|March|April|May|June|July|August|September|October|November|December)/
-const APRIL_FOOLS_PATTERN = /^April Fool's/
-
-// Field names for consistency
 const FIELD_NAMES = {
     MONTHLY: "Monthly Events",
     SPECIAL: "Special Events",
@@ -44,52 +41,6 @@ export const data = new SlashCommandBuilder()
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 
-/**
- * Helper function to determine if an event is a monthly event
- * @param {string} eventTitle - The title of the event
- * @returns {boolean} - Whether the event is a monthly event
- */
-function isMonthlyEventType(eventTitle) {
-    return (
-        MONTHLY_EVENT_PATTERN.test(eventTitle) &&
-        !APRIL_FOOLS_PATTERN.test(eventTitle)
-    )
-}
-
-/**
- * Helper function to get the event title from a link
- * @param {string} link - The link to extract the title from
- * @param {string} type - The type of event ("pets" or "items")
- * @returns {string} - The extracted event title
- */
-function getEventTitleFromLink(link, type) {
-    return type === "pets" ? link.slice(14, -1) : link.slice(14, -7)
-}
-
-/**
- * Helper function to update the embed field for a category of events
- * @param {EmbedBuilder} embed - The embed to update
- * @param {Array} events - The events in the category
- * @param {number} fieldIndex - The index of the field to update
- * @param {string} fieldName - The name of the field
- */
-function updateEmbedField(embed, events, fieldIndex, fieldName) {
-    const updatedValue =
-        events.length > 0
-            ? events
-                .map(
-                    (event, idx) =>
-                        `${idx + 1}. ${event.title}: ${event.status || "⏳ Pending"}`,
-                )
-                .join("\n")
-            : `No ${fieldName.toLowerCase()} found.`
-
-    embed.spliceFields(fieldIndex, 1, {
-        name: fieldName,
-        value: updatedValue,
-        inline: false,
-    })
-}
 
 export async function execute(interaction) {
     const year = interaction.options.getNumber("year")
