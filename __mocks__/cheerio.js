@@ -7,6 +7,7 @@ const mockCheerioObject = {
     }),
     text: jest.fn(),
     val: jest.fn(),
+    html: jest.fn().mockReturnValue("<html><body>mock html</body></html>"),
 }
 
 export const load = jest.fn().mockReturnValue(mockCheerioObject)

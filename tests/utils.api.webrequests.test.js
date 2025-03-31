@@ -74,7 +74,17 @@ describe("makeGETRequest", () => {
     test("returns cached response when available", async () => {
         // Mock cache hit
         requestCache.general.has.mockReturnValue(true)
-        requestCache.general.get.mockReturnValue("cached-response")
+        // Mock a cached HTML string that will be converted to a cheerio object
+        requestCache.general.get.mockReturnValue(
+            "<html><body>cached content</body></html>",
+        )
+
+        // Mock cheerio.load to return a mock cheerio object when loading the cached HTML
+        mockCheerioLoad.mockReturnValue({
+            find: jest.fn(),
+            text: jest.fn(),
+            val: jest.fn(),
+        })
 
         const result = await makeGETRequest("https://example.com", {
             use: true,
@@ -88,14 +98,31 @@ describe("makeGETRequest", () => {
             "GET:https://example.com",
         )
         expect(mockAxiosGet).not.toHaveBeenCalled()
-        expect(result).toBe("cached-response")
+        expect(mockCheerioLoad).toHaveBeenCalledWith(
+            "<html><body>cached content</body></html>",
+        )
+        expect(result).toEqual(
+            expect.objectContaining({
+                find: expect.any(Function),
+                text: expect.any(Function),
+                val: expect.any(Function),
+            }),
+        )
     })
 
     test("makes GET request and caches response when not in cache", async () => {
         // Mock cache miss and successful request
         requestCache.general.has.mockReturnValue(false)
         mockAxiosGet.mockResolvedValue({ data: '<html lang="en"></html>' })
-        mockCheerioLoad.mockReturnValue("cheerio-object")
+
+        // Create a mock cheerio object with html method
+        const mockCheerioObject = {
+            find: jest.fn(),
+            text: jest.fn(),
+            val: jest.fn(),
+            html: jest.fn().mockReturnValue('<html lang="en"></html>'),
+        }
+        mockCheerioLoad.mockReturnValue(mockCheerioObject)
 
         const result = await makeGETRequest("https://example.com", {
             use: true,
@@ -112,15 +139,23 @@ describe("makeGETRequest", () => {
         expect(mockCheerioLoad).toHaveBeenCalledWith('<html lang="en"></html>')
         expect(requestCache.general.set).toHaveBeenCalledWith(
             "GET:https://example.com",
-            "cheerio-object",
+            '<html lang="en"></html>',
         )
-        expect(result).toBe("cheerio-object")
+        expect(result).toBe(mockCheerioObject)
     })
 
     test("doesn't use cache when caching is disabled", async () => {
         // Mock successful request with caching disabled
         mockAxiosGet.mockResolvedValue({ data: '<html lang="en"></html>' })
-        mockCheerioLoad.mockReturnValue("cheerio-object")
+
+        // Create a mock cheerio object with html method
+        const mockCheerioObject = {
+            find: jest.fn(),
+            text: jest.fn(),
+            val: jest.fn(),
+            html: jest.fn().mockReturnValue('<html lang="en"></html>'),
+        }
+        mockCheerioLoad.mockReturnValue(mockCheerioObject)
 
         const result = await makeGETRequest("https://example.com", {
             use: false,
@@ -133,7 +168,7 @@ describe("makeGETRequest", () => {
         )
         expect(mockCheerioLoad).toHaveBeenCalledWith('<html lang="en"></html>')
         expect(requestCache.general.set).not.toHaveBeenCalled()
-        expect(result).toBe("cheerio-object")
+        expect(result).toBe(mockCheerioObject)
     })
 
     test("handles request errors properly", async () => {

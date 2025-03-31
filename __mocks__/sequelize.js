@@ -50,52 +50,12 @@ const Sequelize = jest.fn().mockImplementation(() => ({
     },
 }))
 
-// Mock data types
-Sequelize.STRING = "STRING"
-Sequelize.TEXT = "TEXT"
-Sequelize.NUMBER = "NUMBER"
-Sequelize.INTEGER = "INTEGER"
-Sequelize.FLOAT = "FLOAT"
-Sequelize.BOOLEAN = "BOOLEAN"
-Sequelize.DATE = "DATE"
-Sequelize.JSON = "JSON"
-Sequelize.JSONB = "JSONB"
-Sequelize.BLOB = "BLOB"
-Sequelize.UUID = "UUID"
-Sequelize.UUIDV4 = "UUIDV4"
-Sequelize.ARRAY = jest.fn().mockReturnValue("ARRAY")
-
-// Export data types as named exports
-export const STRING = Sequelize.STRING
-export const TEXT = Sequelize.TEXT
-export const NUMBER = Sequelize.NUMBER
-export const INTEGER = Sequelize.INTEGER
-export const FLOAT = Sequelize.FLOAT
-export const BOOLEAN = Sequelize.BOOLEAN
-export const DATE = Sequelize.DATE
-export const JSON = Sequelize.JSON
-export const JSONB = Sequelize.JSONB
-export const BLOB = Sequelize.BLOB
-export const UUID = Sequelize.UUID
-export const UUIDV4 = Sequelize.UUIDV4
-export const ARRAY = Sequelize.ARRAY
-
-// Mock Model class
-export class Model {
-    static init() {}
-    static sync() {}
-    static findByPk() {}
-    static findAll() {}
-    static findOne() {}
-    static create() {}
-    static update() {}
-    static destroy() {}
-    static count() {}
-    static upsert() {}
-    static bulkCreate() {}
+// Export DataTypes object to match Sequelize's structure
+export const DataTypes = {
+    STRING: Sequelize.STRING,
+    TEXT: Sequelize.TEXT,
+    NUMBER: Sequelize.NUMBER,
+    BIGINT: Sequelize.NUMBER,
 }
-
-// Set Model as a property of Sequelize
-Sequelize.Model = Model
 
 export default Sequelize
