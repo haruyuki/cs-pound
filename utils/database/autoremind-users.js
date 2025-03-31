@@ -72,7 +72,7 @@ export async function checkUserInGuild(guild, userId) {
         // Try to fetch the member
         await guild.members.fetch(userId)
         return true
-    } catch (err) {
+    } catch (_) {
         // Member doesn't exist
         return false
     }

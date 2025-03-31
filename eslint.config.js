@@ -89,6 +89,14 @@ export default [
             ],
 
             "no-trailing-spaces": ["error"],
+            "no-unused-vars": [
+                "error",
+                {
+                    "argsIgnorePattern": "^_",
+                    "varsIgnorePattern": "^_",
+                    "caughtErrorsIgnorePattern": "^_",
+                },
+            ],
             "no-var": "error",
             "object-curly-spacing": ["error", "always"],
             "prefer-const": "error",
