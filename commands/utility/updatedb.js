@@ -12,6 +12,10 @@ import { makeGETRequest } from "../../utils/api/webrequests.js"
 import { delay } from "../../utils/common/delay.js"
 import { Logger } from "../../utils/common/logger.js"
 
+// Regex pattern to identify monthly events (excluding April Fool's which is considered special)
+const MONTHLY_EVENT_PATTERN = /^(January|February|March|April|May|June|July|August|September|October|November|December)/
+const APRIL_FOOLS_PATTERN = /^April Fool's/
+
 export const data = new SlashCommandBuilder()
     .setName("updatedb")
     .setDescription("Update the database with pet data for a specific year")
@@ -101,18 +105,14 @@ export async function execute(interaction) {
         const monthlyEvents = eventStatuses
             .filter(
                 (event) =>
-                    /^(January|February|March|April|May|June|July|August|September|October|November|December)/.test(
-                        event.title,
-                    ) && !/^April Fool's/.test(event.title),
+                    MONTHLY_EVENT_PATTERN.test(event.title) && !APRIL_FOOLS_PATTERN.test(event.title),
             )
             .map((event) => ({ ...event, status: "⏳ Pending" }))
 
         const specialEvents = eventStatuses
             .filter(
                 (event) =>
-                    !/^(January|February|March|April|May|June|July|August|September|October|November|December)/.test(
-                        event.title,
-                    ) || /^April Fool's/.test(event.title),
+                    !MONTHLY_EVENT_PATTERN.test(event.title) || APRIL_FOOLS_PATTERN.test(event.title),
             )
             .map((event) => ({ ...event, status: "⏳ Pending" }))
 
@@ -122,7 +122,7 @@ export async function execute(interaction) {
 
         // Add fields for Monthly and Special events
         progressEmbed.addFields({
-            name: "Monthly Events",
+            name: "Monthly",
             value:
                 monthlyEvents.length > 0
                     ? monthlyEvents
@@ -136,7 +136,7 @@ export async function execute(interaction) {
         })
 
         progressEmbed.addFields({
-            name: "Special Events",
+            name: "Special",
             value:
                 specialEvents.length > 0
                     ? specialEvents
@@ -195,10 +195,7 @@ export async function execute(interaction) {
             eventStatuses[i].pages = dataGroups
 
             // Determine if this is a monthly or special event
-            let isMonthlyEvent =
-                /^(January|February|March|April|May|June|July|August|September|October|November|December)/.test(
-                    eventTitle,
-                ) && !/^April Fool's/.test(eventTitle)
+            let isMonthlyEvent = MONTHLY_EVENT_PATTERN.test(eventTitle) && !APRIL_FOOLS_PATTERN.test(eventTitle)
             // 0 for Monthly, 1 for Special
             let fieldIndex = isMonthlyEvent ? 0 : 1
 
@@ -272,9 +269,7 @@ export async function execute(interaction) {
             // Update the event status in the appropriate field
             // Reuse the same variables from earlier in the loop to avoid redeclaration
             isMonthlyEvent =
-                /^(January|February|March|April|May|June|July|August|September|October|November|December)/.test(
-                    eventTitle,
-                )
+                MONTHLY_EVENT_PATTERN.test(eventTitle) && !APRIL_FOOLS_PATTERN.test(eventTitle)
             // 0 for Monthly, 1 for Special
             fieldIndex = isMonthlyEvent ? 0 : 1
             events = isMonthlyEvent ? monthlyEvents : specialEvents
