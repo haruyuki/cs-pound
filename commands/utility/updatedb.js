@@ -4,11 +4,13 @@ import {
     SlashCommandBuilder,
 } from "discord.js"
 
-import { fetchEventLinks, processPage } from "../../utils/api/chickensmoothie-archive.js"
+import {
+    fetchEventLinks,
+    processPage,
+} from "../../utils/api/chickensmoothie-archive.js"
 import { makeGETRequest } from "../../utils/api/webrequests.js"
 import { delay } from "../../utils/common/delay.js"
 import { Logger } from "../../utils/common/logger.js"
-
 
 export const data = new SlashCommandBuilder()
     .setName("updatedb")
@@ -97,10 +99,11 @@ export async function execute(interaction) {
 
         // Group events into Monthly and Special categories
         const monthlyEvents = eventStatuses
-            .filter((event) =>
-                /^(January|February|March|April|May|June|July|August|September|October|November|December)/.test(
-                    event.title,
-                ) && !/^April Fool's/.test(event.title),
+            .filter(
+                (event) =>
+                    /^(January|February|March|April|May|June|July|August|September|October|November|December)/.test(
+                        event.title,
+                    ) && !/^April Fool's/.test(event.title),
             )
             .map((event) => ({ ...event, status: "⏳ Pending" }))
 
