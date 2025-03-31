@@ -92,9 +92,9 @@ export default [
             "no-unused-vars": [
                 "error",
                 {
-                    "argsIgnorePattern": "^_",
-                    "varsIgnorePattern": "^_",
-                    "caughtErrorsIgnorePattern": "^_",
+                    argsIgnorePattern: "^_",
+                    varsIgnorePattern: "^_",
+                    caughtErrorsIgnorePattern: "^_",
                 },
             ],
             "no-var": "error",
