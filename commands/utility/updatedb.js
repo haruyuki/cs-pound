@@ -1,4 +1,8 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import {
+    EmbedBuilder,
+    PermissionFlagsBits,
+    SlashCommandBuilder,
+} from "discord.js"
 
 import { makeGETRequest } from "../../utils/api/webrequests.js"
 import { Logger } from "../../utils/common/logger.js"
@@ -29,6 +33,7 @@ async function fetchEventLinks(year, type) {
 async function processPage(pageLink, type, year, eventTitle) {
     // Use static cache type since these pages don't change frequently
     const $ = await makeGETRequest(pageLink, { use: true, type: "static" })
+    let added = 0
 
     if (type === "pets") {
         const petLinks = $('img[alt="Pet"]')
@@ -44,7 +49,7 @@ async function processPage(pageLink, type, year, eventTitle) {
             ),
         ].filter((id) => id && !EXCEPTIONS.has(id))
 
-        return Promise.all(
+        await Promise.all(
             petIds.map(async (petId) => {
                 try {
                     await PetDB.upsert({
@@ -53,7 +58,7 @@ async function processPage(pageLink, type, year, eventTitle) {
                         petEvent: eventTitle,
                         petLink: pageLink,
                     })
-                    return petId
+                    added++
                 } catch (err) {
                     if (err.name === "SequelizeUniqueConstraintError") {
                         Logger.warn(`Pet ID ${petId} already exists.`)
@@ -63,6 +68,7 @@ async function processPage(pageLink, type, year, eventTitle) {
                 }
             }),
         )
+        return added
     }
 
     if (type === "items") {
@@ -78,7 +84,7 @@ async function processPage(pageLink, type, year, eventTitle) {
             })
             .get()
 
-        return Promise.all(
+        await Promise.all(
             items.map(async ({ name, left, right }) => {
                 try {
                     await ItemDB.upsert({
@@ -89,7 +95,7 @@ async function processPage(pageLink, type, year, eventTitle) {
                         itemEvent: eventTitle,
                         itemLink: pageLink,
                     })
-                    return `${left}-${right}`
+                    added.added++
                 } catch (err) {
                     if (err.name === "SequelizeUniqueConstraintError") {
                         Logger.warn(`Item ID ${left}-${right} already exists.`)
@@ -99,7 +105,9 @@ async function processPage(pageLink, type, year, eventTitle) {
                 }
             }),
         )
+        return added
     }
+    return added
 }
 
 function delay(ms) {
@@ -131,14 +139,65 @@ export async function execute(interaction) {
     const year = interaction.options.getNumber("year")
     const type = interaction.options.getString("type")
 
-    await interaction.reply(`## Updating ${type} database for year ${year}`)
-
     try {
+        // Initial reply with loading message
+        await interaction.reply(
+            `Fetching events for ${type} database of year ${year}...`,
+        )
+
+        // Get all event links
         const eventLinks = await fetchEventLinks(year, type)
 
+        if (eventLinks.length === 0) {
+            await interaction.editReply(
+                `No events found for ${type} of year ${year}.`,
+            )
+            return
+        }
+
+        // Create an array to track event processing status
+        const eventStatuses = []
+
+        // Process event links to get titles and create status tracking
         for (const event of eventLinks) {
             const link = decodeURIComponent(event.replace(/\?.*$/, ""))
             const baseLink = `https://www.chickensmoothie.com${encodeURI(link)}`
+            const eventTitle =
+                type === "pets" ? link.slice(14, -1) : link.slice(14, -7)
+
+            eventStatuses.push({
+                title: eventTitle,
+                link: baseLink,
+                completed: false,
+                pages: 0,
+            })
+        }
+
+        // Create initial progress embed
+        const progressEmbed = new EmbedBuilder()
+            .setColor(0x00ae86)
+            .setTitle(`Updating ${type} database for year ${year}`)
+            .setDescription(`Processing ${eventLinks.length} events...`)
+            .setTimestamp()
+
+        // Add fields for each event
+        eventStatuses.forEach((event, index) => {
+            progressEmbed.addFields({
+                name: `${index + 1}. ${event.title}`,
+                value: "⏳ Pending",
+                inline: false,
+            })
+        })
+
+        // Send the initial embed
+        await interaction.editReply({ embeds: [progressEmbed] })
+
+        // Process each event
+        for (let i = 0; i < eventLinks.length; i++) {
+            const event = eventLinks[i]
+            const link = decodeURIComponent(event.replace(/\?.*$/, ""))
+            const baseLink = `https://www.chickensmoothie.com${encodeURI(link)}`
+
             // Use static cache type since event pages rarely change
             const $ = await makeGETRequest(baseLink, {
                 use: true,
@@ -147,9 +206,21 @@ export async function execute(interaction) {
 
             const eventTitle =
                 type === "pets" ? link.slice(14, -1) : link.slice(14, -7)
-
             const pages =
                 $("div.pages").length === 0 ? 1 : $("div.pages a").length
+
+            // Update status to processing
+            eventStatuses[i].pages = pages
+            progressEmbed.spliceFields(i, 1, {
+                name: `${i + 1}. ${eventTitle}`,
+                value: "🔄 Processing...",
+                inline: false,
+            })
+
+            await interaction.editReply({ embeds: [progressEmbed] })
+
+            // Process all pages for this event
+            let addedStats = 0
 
             for (let page = 0; page < pages; page++) {
                 const pageMultiplier = type === "pets" ? 7 : 10
@@ -157,22 +228,52 @@ export async function execute(interaction) {
                     page === 0
                         ? baseLink
                         : `${baseLink}?pageStart=${page * pageMultiplier}`
-                await processPage(pageLink, type, year, eventTitle)
+                const pageStats = await processPage(
+                    pageLink,
+                    type,
+                    year,
+                    eventTitle,
+                )
+
+                // Accumulate stats for this event
+                addedStats += pageStats
+
                 await delay(5000)
             }
 
-            await interaction.channel.send(
-                `Added ${pages} page${pages > 1 ? "s" : ""} from [${eventTitle}](${baseLink})`,
-            )
-            await delay(10000)
+            // Store stats in eventStatuses
+            eventStatuses[i].added = addedStats
+
+            // Mark event as completed
+            eventStatuses[i].completed = true
+            progressEmbed.spliceFields(i, 1, {
+                name: `${i + 1}. ${eventTitle}`,
+                value: `✅ Completed - ${pages} page${pages > 1 ? "s" : ""} processed (Added ${addedStats} ${type})`,
+                inline: false,
+            })
+
+            await interaction.editReply({ embeds: [progressEmbed] })
+            await delay(5000)
         }
-        await interaction.channel.send(
-            `*Update complete for ${type} of year ${year}.*`,
+
+        // Calculate total stats across all events
+        const totalAdded = eventStatuses.reduce(
+            (sum, event) => sum + (event.added || 0),
+            0,
         )
+
+        // Update embed with completion message including stats
+        progressEmbed.setDescription(
+            `✅ Update complete for ${type} database of year ${year}!\nTotal: ${totalAdded} ${type} added`,
+        )
+        // Green color for completion
+        progressEmbed.setColor(0x00ff00)
+        await interaction.editReply({ embeds: [progressEmbed] })
     } catch (err) {
         Logger.error(err)
-        await interaction.channel.send(
-            "An error occurred while updating the database.",
-        )
+        await interaction.editReply({
+            content: "An error occurred while updating the database.",
+            embeds: [],
+        })
     }
 }
