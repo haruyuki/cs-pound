@@ -6,16 +6,14 @@ import {
     PermissionFlagsBits,
     SlashCommandBuilder,
 } from "discord.js"
-import { MongoClient } from "mongodb"
 
-import { DATABASE_CONFIG } from "../../config.js"
 import { Logger } from "../../utils/common/logger.js"
-
-const client = new MongoClient(DATABASE_CONFIG.MONGODB.URI)
-const database = client.db(DATABASE_CONFIG.MONGODB.DB_NAME)
-const collection = database.collection(
-    DATABASE_CONFIG.MONGODB.COLLECTIONS.AUTO_REMIND,
-)
+import {
+    checkUserInGuild,
+    fetchAllAutoremindUsers,
+    groupUsersByGuild,
+    removeMissingUsers,
+} from "../../utils/database/autoremind-users.js"
 
 export const data = new SlashCommandBuilder()
     .setName("checkusers")
@@ -28,21 +26,10 @@ export async function execute(interaction) {
     await interaction.deferReply()
 
     // Get all registrations with only necessary fields
-    const registrations = await collection
-        .find({}, { projection: { server_id: 1, user_id: 1 } })
-        .toArray()
-    Logger.debug(`Fetched ${registrations.length} autoreminds from database.`)
+    const registrations = await fetchAllAutoremindUsers()
 
     // Group registrations by guild (server_id) more efficiently
-    const guildGroups = registrations.reduce((groups, reg) => {
-        const serverId = reg.server_id
-        if (!groups.has(serverId)) {
-            groups.set(serverId, [])
-        }
-        groups.get(serverId).push({ userId: reg.user_id, docId: reg._id })
-        return groups
-    }, new Map())
-    Logger.debug(`Grouped into ${guildGroups.size} guild groups.`)
+    const guildGroups = groupUsersByGuild(registrations)
 
     const finalOutput = []
     // Track missing users for potential removal
@@ -96,14 +83,11 @@ export async function execute(interaction) {
                     // Process this batch of users in parallel
                     const userChecks = await Promise.allSettled(
                         userBatch.map(async (userId) => {
-                            try {
-                                // Try to fetch the member
-                                await guild.members.fetch(userId.userId)
-                                return { user: userId, exists: true }
-                            } catch (err) {
-                                // Member doesn't exist
-                                return { user: userId, exists: false }
-                            }
+                            const exists = await checkUserInGuild(
+                                guild,
+                                userId.userId,
+                            )
+                            return { user: userId, exists }
                         }),
                     )
 
@@ -196,10 +180,8 @@ export async function execute(interaction) {
             // Extract document IDs for removal
             const userIds = missingUserRecords.map((user) => user.userId)
 
-            // Remove users from database
-            const deleteResult = await collection.deleteMany({
-                user_id: { $in: userIds },
-            })
+            // Remove users from database using utility function
+            const deleteResult = await removeMissingUsers(userIds)
 
             await interaction.editReply({
                 content: `Successfully removed ${deleteResult.deletedCount} user${deleteResult.deletedCount !== 1 ? "s" : ""} from the database.`,
