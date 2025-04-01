@@ -11,7 +11,6 @@ import {
 } from "../../utils/api/petimage.js"
 import { Logger } from "../../utils/common/logger.js"
 
-// Clean up any existing image files on startup
 cleanupExistingImage("rares.png")
 
 let imageGenerated = false
@@ -40,7 +39,18 @@ export async function execute(interaction) {
 
     imageGenerating = true
 
-    const openingDetails = await getOpeningTime()
+    let openingDetails
+    try {
+        openingDetails = await getOpeningTime()
+    } catch (error) {
+        Logger.error("Command execution failed:", error)
+        await interaction.reply(
+            "There was an error while getting the opening time. Please try again later.",
+        )
+        imageGenerating = false
+        return
+    }
+
     if (openingDetails.openingType === "lost and found") {
         await interaction.reply("The next opening is not the Pound!")
         imageGenerating = false
@@ -60,7 +70,6 @@ export async function execute(interaction) {
 
     try {
         Logger.debug("Fetching rare pets from the pound")
-        // Get rare pets from the pound using the updated function
         const rarePets = await getRarePoundPets()
 
         const rares = await generatePetImage(rarePets, "rares.png")
@@ -80,7 +89,6 @@ export async function execute(interaction) {
             ],
         })
 
-        // Schedule deletion of the image file
         scheduleImageDeletion("rares.png", openingDetails.timeRemaining, () => {
             imageGenerated = false
             imageGenerating = false
@@ -93,5 +101,3 @@ export async function execute(interaction) {
         imageGenerating = false
     }
 }
-
-// Image generation functions have been moved to utils/petimage.js

@@ -41,7 +41,6 @@ export const data = new SlashCommandBuilder()
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 
-
 export async function execute(interaction) {
     const year = interaction.options.getNumber("year")
     const type = interaction.options.getString("type")
@@ -52,13 +51,11 @@ export async function execute(interaction) {
     )
 
     try {
-        // Initial reply with loading message
         await interaction.reply(
             `Fetching events for ${type} database of year ${year}...`,
         )
         Logger.debug("Initial reply sent to user")
 
-        // Get all event links
         Logger.debug(`Fetching event links for ${year}`)
         const eventLinks = await fetchEventLinks(year, type)
 
@@ -74,7 +71,6 @@ export async function execute(interaction) {
             `Found ${eventLinks.length} events for ${type} of year ${year}`,
         )
 
-        // Create an array to track event processing status
         const eventStatuses = []
         Logger.debug(
             `Creating event status tracking for ${eventLinks.length} events`,

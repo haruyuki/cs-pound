@@ -20,14 +20,12 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
     const state = interaction.options.getBoolean("enable")
 
-    // If state is provided, set debug mode accordingly
     if (state) {
         Logger.enableDebug()
     } else {
         Logger.disableDebug()
     }
 
-    // Reply with the current debug mode status
     await interaction.reply({
         content: `Debug mode is now ${state ? "enabled" : "disabled"}.`,
         flags: MessageFlags.Ephemeral,

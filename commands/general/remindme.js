@@ -38,13 +38,9 @@ export async function execute(interaction) {
         })
 
         setTimeout(async () => {
-            try {
-                await interaction.channel.send({
-                    content: `${interaction.user}, this is your ${amount} reminder!`,
-                })
-            } catch (error) {
-                Logger.error(`Failed to send reminder: ${error}`)
-            }
+            await interaction.channel.send(
+                `${interaction.user}, this is your ${amount} reminder!`,
+            )
         }, milliseconds)
     } catch (error) {
         Logger.error(`Error in remindme command: ${error}`)
