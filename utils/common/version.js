@@ -6,11 +6,17 @@ import { execSync } from "child_process"
 
 import { Logger } from "./logger.js"
 
+let cachedVersion = null
+
 /**
  * Gets the latest Git commit date and hash, and formats it as a version string (YYYY.MM.DD (Git hash))
  * @returns {string} Formatted version string based on latest commit date and hash
  */
 export function getVersionFromGit() {
+    if (cachedVersion) {
+        return cachedVersion
+    }
+
     try {
         // Get the latest commit date in ISO format
         const commitDate = execSync("git log -1 --format=%cd --date=iso")
@@ -28,7 +34,8 @@ export function getVersionFromGit() {
         const month = String(date.getUTCMonth() + 1).padStart(2, "0")
         const day = String(date.getUTCDate()).padStart(2, "0")
 
-        return `${year}.${month}.${day} (${commitHash})`
+        cachedVersion = `${year}.${month}.${day} (${commitHash})`
+        return cachedVersion
     } catch (error) {
         // Log the error but re-throw it so getVersion can handle it
         Logger.error("Failed to get version from Git:", error.message)

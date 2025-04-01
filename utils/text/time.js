@@ -19,6 +19,7 @@ export function formatter([h, m, s]) {
         .replace(/,([^,]*)$/, " and$1")
 }
 
+const timeStringCache = new Map()
 /**
  * Parses a time string into hours, minutes, and seconds components
  * @param {string} amount - The time string to parse. Can be in formats:
@@ -30,6 +31,10 @@ export function formatter([h, m, s]) {
  *   - Normalizes values (e.g., 90s becomes [0, 1, 30])
  */
 export function parseTimeString(amount) {
+    if (timeStringCache.has(amount)) {
+        return timeStringCache.get(amount)
+    }
+
     const times = { h: 0, m: 0, s: 0 }
 
     if (/^\d+$/.test(amount)) {
@@ -58,5 +63,7 @@ export function parseTimeString(amount) {
         times.m = times.m % 60
     }
 
-    return [times.h, times.m, times.s]
+    const result = [times.h, times.m, times.s]
+    timeStringCache.set(amount, result)
+    return result
 }
