@@ -133,3 +133,54 @@ export const getAutoRemindDocuments = async (time, openingType) => {
         return []
     }
 }
+
+/**
+ * Fetches all autoremind users from the database with their server IDs
+ * @returns {Promise<Array>} Array of documents containing user_id and server_id
+ */
+export async function fetchAllAutoRemindUsers() {
+    try {
+        const startTime = performance.now()
+
+        // Get all registrations with only necessary fields
+        const registrations = await collection
+            .find({}, { projection: { server_id: 1, user_id: 1 } })
+            .toArray()
+
+        const endTime = performance.now()
+        Logger.debug(
+            `Fetched ${registrations.length} autoreminds from database (${Math.round(endTime - startTime)}ms).`,
+        )
+
+        return registrations
+    } catch (error) {
+        Logger.error(`Error fetching autoremind users: ${error.message}`)
+        return []
+    }
+}
+
+/**
+ * Removes users from the autoremind database
+ * @param {Array<string>} userIds - Array of user IDs to remove
+ * @returns {Promise<Object>} Object containing the number of deleted documents
+ */
+export async function removeMissingUsers(userIds) {
+    try {
+        const startTime = performance.now()
+
+        // Remove users from database
+        const deleteResult = await collection.deleteMany({
+            user_id: { $in: userIds },
+        })
+
+        const endTime = performance.now()
+        Logger.debug(
+            `Removed ${deleteResult.deletedCount} users from database (${Math.round(endTime - startTime)}ms).`,
+        )
+
+        return deleteResult
+    } catch (error) {
+        Logger.error(`Error removing users from database: ${error.message}`)
+        return { deletedCount: 0 }
+    }
+}

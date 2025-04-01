@@ -7,13 +7,13 @@ import {
     SlashCommandBuilder,
 } from "discord.js"
 
+import { checkUserInGuild } from "../../utils/common/discord.js"
+import { groupUsersByGuild } from "../../utils/common/grouping.js"
 import { Logger } from "../../utils/common/logger.js"
 import {
-    checkUserInGuild,
-    fetchAllAutoremindUsers,
-    groupUsersByGuild,
+    fetchAllAutoRemindUsers,
     removeMissingUsers,
-} from "../../utils/database/autoremind-users.js"
+} from "../../utils/database/mongo-db.js"
 
 export const data = new SlashCommandBuilder()
     .setName("checkusers")
@@ -25,25 +25,19 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
     await interaction.deferReply()
 
-    // Get all registrations with only necessary fields
-    const registrations = await fetchAllAutoremindUsers()
-
-    // Group registrations by guild (server_id) more efficiently
-    const guildGroups = groupUsersByGuild(registrations)
+    const users = await fetchAllAutoRemindUsers()
+    const guildGroups = groupUsersByGuild(users)
 
     const finalOutput = []
-    // Track missing users for potential removal
     const missingUserRecords = []
     let processedGuilds = 0
 
-    // Process guilds in parallel with a concurrency limit
     const BATCH_SIZE = 5
     const guildEntries = Array.from(guildGroups.entries())
 
     for (let i = 0; i < guildEntries.length; i += BATCH_SIZE) {
         const batch = guildEntries.slice(i, i + BATCH_SIZE)
 
-        // Process this batch of guilds in parallel
         await Promise.all(
             batch.map(async ([serverId, userIds]) => {
                 processedGuilds++
@@ -59,7 +53,6 @@ export async function execute(interaction) {
 
                     // All users are missing if guild is not found
                     const missingUsers = userIds.map((user) => {
-                        // Add to missing users list for potential removal
                         missingUserRecords.push(user)
                         return `* User ID \`${user.userId}\` (bot not in guild)`
                     })
@@ -73,14 +66,12 @@ export async function execute(interaction) {
 
                 Logger.debug(`Fetched guild: ${guild.name} (${serverId}).`)
 
-                // Process users in batches to avoid rate limiting
                 const USER_BATCH_SIZE = 25
                 const missingUsers = []
 
                 for (let j = 0; j < userIds.length; j += USER_BATCH_SIZE) {
                     const userBatch = userIds.slice(j, j + USER_BATCH_SIZE)
 
-                    // Process this batch of users in parallel
                     const userChecks = await Promise.allSettled(
                         userBatch.map(async (userId) => {
                             const exists = await checkUserInGuild(
@@ -91,7 +82,6 @@ export async function execute(interaction) {
                         }),
                     )
 
-                    // Process results from this batch
                     for (const result of userChecks) {
                         if (
                             result.status === "fulfilled" &&
@@ -164,7 +154,6 @@ export async function execute(interaction) {
     }
 
     try {
-        // Wait for button interaction
         const confirmation = await message.awaitMessageComponent({
             filter: (i) => i.user.id === interaction.user.id,
             time: 60000,
@@ -210,8 +199,7 @@ export async function execute(interaction) {
                         : [],
             })
         }
-    } catch (e) {
-        // Timeout or error
+    } catch (error) {
         await interaction.editReply({
             content: "Button interaction timed out or failed.",
             components: [],
@@ -220,6 +208,6 @@ export async function execute(interaction) {
                     ? Array.from(message.attachments.values())
                     : [],
         })
-        Logger.error(`Button interaction error: ${e}`)
+        Logger.error(`Button interaction error: ${error}`)
     }
 }
