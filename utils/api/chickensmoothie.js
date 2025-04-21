@@ -3,10 +3,7 @@ import { performance } from "node:perf_hooks"
 import { CS_CONFIG } from "../../config.js"
 import { Logger } from "../common/logger.js"
 import { formatOpeningTime, formatOpenMessage } from "../text/messages.js"
-import { login } from "./auth.js"
 import { makeGETRequest } from "./webrequests.js"
-
-const RARE_RARITIES = ["Rare", "Very rare", "Extremely rare", "OMG so rare!"]
 
 /**
  * Gets the current opening time information for the Pound or Lost and Found
@@ -73,51 +70,6 @@ export const getOpeningTime = async () => {
     } catch (error) {
         Logger.error("Error while getting opening time:", error.message)
         return null
-    }
-}
-
-/**
- * Retrieves rare pets currently available in the pound
- * Logs in first to ensure access to the pound page
- * @returns {Promise<Array>} Array of rare pets with their details [imageUrl, adoptionDate, rarity]
- */
-export const getRarePoundPets = async () => {
-    // Log in and check if successful
-    await login()
-
-    try {
-        // Fetch the pound page HTML using axiosClient
-        const $ = await makeGETRequest(CS_CONFIG.URLS.POUND_GROUP, {
-            use: true,
-            type: "static",
-        })
-        const allPets = []
-
-        // Loop through all pets and extract rare pets
-        $("dl.pet").each((_, petElement) => {
-            const petRarity = $(petElement).find(".pet-rarity img").attr("alt")
-
-            // Only process if the pet rarity matches the desired rare categories
-            if (RARE_RARITIES.includes(petRarity)) {
-                const petAdoption = $(petElement)
-                    .find(".pet-adoption-date")
-                    .text()
-                    .trim()
-
-                const petImage = new URL(
-                    $(petElement).find("dt a img").attr("src"),
-                )
-                petImage.searchParams.set("bg", "e0f6b2")
-
-                // Push the pet details into the array
-                allPets.push([petImage.toString(), petAdoption, petRarity])
-            }
-        })
-
-        return allPets
-    } catch (error) {
-        Logger.error("Error fetching rare pound pets:", error.message)
-        return []
     }
 }
 

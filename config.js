@@ -101,8 +101,6 @@ export const CS_CONFIG = {
     URLS: {
         LOGIN: "https://www.chickensmoothie.com/Forum/ucp.php?mode=login",
         POUND_LAF: "https://www.chickensmoothie.com/poundandlostandfound.php",
-        POUND_GROUP:
-            "https://www.chickensmoothie.com/accounts/viewgroup.php?userid=2887&groupid=5813&pageSize=3000",
     },
 }
 
