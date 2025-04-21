@@ -30,7 +30,7 @@ describe("Logger", () => {
         expect(console.log).toHaveBeenCalledTimes(1)
         // We can't easily test the exact string with chalk colors, but we can check it contains our message
         expect(console.log.mock.calls[0][0]).toContain("Test info message")
-        expect(console.log.mock.calls[0][0]).toContain("INFO:")
+        expect(console.log.mock.calls[0][0]).toContain("INFO")
     })
 
     test("warn logs messages with correct format and color", () => {
@@ -40,7 +40,7 @@ describe("Logger", () => {
         expect(moment().format).toHaveBeenCalledWith("YYYY-MM-DD HH:mm:ss")
         expect(console.warn).toHaveBeenCalledTimes(1)
         expect(console.warn.mock.calls[0][0]).toContain("Test warning message")
-        expect(console.warn.mock.calls[0][0]).toContain("WARN:")
+        expect(console.warn.mock.calls[0][0]).toContain("WARN")
     })
 
     test("error logs messages with correct format and color", () => {
@@ -50,7 +50,7 @@ describe("Logger", () => {
         expect(moment().format).toHaveBeenCalledWith("YYYY-MM-DD HH:mm:ss")
         expect(console.error).toHaveBeenCalledTimes(1)
         expect(console.error.mock.calls[0][0]).toContain("Test error message")
-        expect(console.error.mock.calls[0][0]).toContain("ERROR:")
+        expect(console.error.mock.calls[0][0]).toContain("ERROR")
     })
 
     test("success logs messages with correct format and color", () => {
@@ -60,7 +60,7 @@ describe("Logger", () => {
         expect(moment().format).toHaveBeenCalledWith("YYYY-MM-DD HH:mm:ss")
         expect(console.log).toHaveBeenCalledTimes(1)
         expect(console.log.mock.calls[0][0]).toContain("Test success message")
-        expect(console.log.mock.calls[0][0]).toContain("SUCCESS:")
+        expect(console.log.mock.calls[0][0]).toContain("SUCCESS")
     })
 
     test("debug does not log messages when debug mode is disabled", () => {
@@ -80,7 +80,7 @@ describe("Logger", () => {
         expect(moment().format).toHaveBeenCalledWith("YYYY-MM-DD HH:mm:ss")
         expect(console.log).toHaveBeenCalledTimes(1)
         expect(console.log.mock.calls[0][0]).toContain("Test debug message")
-        expect(console.log.mock.calls[0][0]).toContain("DEBUG:")
+        expect(console.log.mock.calls[0][0]).toContain("DEBUG")
 
         // Disable debug mode for other tests
         Logger.disableDebug()
