@@ -30,8 +30,8 @@ export const getOpeningTime = async () => {
         if (isPound || isLostAndFound) {
             // Select the corresponding remaining count based on the section (Pound or Lost and Found)
             const remainingSelector = isPound
-                ? "#pets_remaining"
-                : "#items_remaining"
+                ? "#pets-remaining"
+                : "#items-remaining"
             const thingsRemaining = parseNumber($(remainingSelector).text())
 
             const endTime = performance.now()
